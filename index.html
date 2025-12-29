@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Al-Qismah| Professional Farāʾiḍ Calculator</title>
+    <title>Al-Farāʾiḍ Pro | Mobile</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -34,9 +34,9 @@
                         </a>
                     </div>
 
-                    <div class="hidden lg:flex items-center space-x-8">
-                        <a href="#" class="hover:text-emerald-300 transition text-sm font-medium">Home</a>
-                        <div class="relative group">
+                    <div class="hidden lg:flex items-center space-x-8 ml-12
+                      ">
+                         <div class="relative group">
                             <button class="flex items-center hover:text-emerald-300 transition text-sm font-medium focus:outline-none">
                                 Rules
                                 <svg class="ml-1 w-4 h-4 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
@@ -61,7 +61,9 @@
                                 </div>
                             </div>
                         </div>
-                        
+                        <a href="#" class="hover:text-emerald-300 transition text-sm font-medium">Home</a>
+                       
+
                     </div>
 
                     <div class="lg:hidden flex items-center">
@@ -97,19 +99,35 @@
 
     <main class="px-4 pt-4 space-y-12">
         
-        <div class="bg-white p-6 rounded-3xl shadow-md border border-slate-100">
-            <h2 class="text-sm font-bold text-emerald-800 mb-4 flex items-center">
-                <span class="mr-2"></span> Estate Details
-            </h2>
-            <div class="space-y-4">
-                <div>
-                    <label class="text-sm font-bold text-emerald-600 mb-4 flex items-center">Total Estate</label>
-                    <input type="number" id="totalEstate" class="w-full mt-1 p-4 bg-slate-50 rounded-2xl border-2 border-transparent focus:border-emerald-500 outline-none font-bold" placeholder="0.00">
-                </div>
-                
+       <div class="bg-white p-6 rounded-3xl shadow-md border border-slate-100">
+    <h2 class="text-sm font-bold text-emerald-800 mb-4 flex items-center">
+        Estate Details
+    </h2>
+    <div class="space-y-6">
+        <div>
+            <label class="text-xs font-bold text-emerald-600 uppercase tracking-wider">The Deceased is:</label>
+            <div class="flex gap-4 mt-2">
+                <button type="button" onclick="setGender('male')" id="btnMale" class="flex-1 flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all border-emerald-500 bg-emerald-50 text-emerald-700">
+                    <span class="text-sm font-bold">Male</span>
+                    <span class="text-[9px] uppercase opacity-60">Husband</span>
+                </button>
+                <button type="button" onclick="setGender('female')" id="btnFemale" class="flex-1 flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all border-slate-100 bg-slate-50 text-slate-400">
+                    <span class="text-sm font-bold">Female</span>
+                    <span class="text-[9px] uppercase opacity-60">Wife</span>
+                </button>
             </div>
+            <input type="hidden" id="deceasedGender" value="male">
         </div>
 
+        <div>
+            <label class="text-xs font-bold text-emerald-600 uppercase tracking-wider">Total Estate Amount</label>
+            <input type="number" id="totalEstate" class="w-full mt-1 p-4 bg-slate-50 rounded-2xl border-2 border-transparent focus:border-emerald-500 outline-none font-bold" placeholder="0.00">
+        </div>
+    </div>
+</div>
+        
+    </div>
+</div>
         <div class="bg-white p-6 rounded-3xl shadow-md border border-slate-100">
             <h2 class="text-sm font-bold text-emerald-800 mb-4 flex items-center">
                 <span class="mr-2"></span> Select Heirs
@@ -138,8 +156,28 @@
     </div>
 
     <script>
-        const heirCategories = [
-    { id: "spouses", label: "Husband/Wife", sub: "Must be legally married", type: "select" },
+       let selectedGender = 'male';
+
+function setGender(gender) {
+    selectedGender = gender;
+    document.getElementById('deceasedGender').value = gender;
+    
+    const btnMale = document.getElementById('btnMale');
+    const btnFemale = document.getElementById('btnFemale');
+    
+    if (gender === 'male') {
+        btnMale.className = "flex-1 flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all border-emerald-500 bg-emerald-50 text-emerald-700";
+        btnFemale.className = "flex-1 flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all border-slate-100 bg-slate-50 text-slate-400";
+    } else {
+        btnFemale.className = "flex-1 flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all border-emerald-500 bg-emerald-50 text-emerald-700";
+        btnMale.className = "flex-1 flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all border-slate-100 bg-slate-50 text-slate-400";
+    }
+    
+    renderHeirs();
+}
+
+const heirCategories = [
+    { id: "spouses", label: "Spouse", sub: "Surviving husband/wives", type: "number" },
     { id: "sons", label: "Sons", sub: "Biological", type: "number" },
     { id: "daughters", label: "Daughters", sub: "Biological", type: "number" },
     { id: "grandsons", label: "Grandsons", sub: "Son's side", type: "number" },
@@ -156,102 +194,90 @@
     { id: "maternalBrothers", label: "Maternal Brothers", sub: "Same mother", type: "number" },
     { id: "maternalSisters", label: "Maternal Sisters", sub: "Same mother", type: "number" },
     { id: "fullNephews", label: "Full Brother's Sons", sub: "", type: "number" },
-    { id: "fullUncles", label: "Paternal Full Uncles", sub: "Father's full brother", type: "number" },
+    { id: "fullUncles", label: "Paternal Full Uncles", sub: "Father's full brother", type: "number" }
 ];
 
-// Mobile Menu logic
-const menuBtn = document.getElementById('mobile-menu-button');
-const mobileMenu = document.getElementById('mobile-menu');
-menuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+function renderHeirs() {
+    const grid = document.getElementById('heirGrid');
+    grid.innerHTML = '';
+    
+    heirCategories.forEach(h => {
+        let displayLabel = h.label;
+        if (h.id === 'spouses') {
+            displayLabel = selectedGender === 'male' ? "Surviving Wives" : "Surviving Husband";
+        }
 
-// Render Heirs
-const grid = document.getElementById('heirGrid');
-heirCategories.forEach(h => {
-    const div = document.createElement('div');
-    div.className = "flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100";
-    let input = '';
-    if (h.type === 'number') input = `<input type="number" id="${h.id}" value="0" min="0" class="w-14 h-10 text-center bg-white border rounded-xl font-bold">`;
-    else if (h.type === 'checkbox') input = `<input type="checkbox" id="${h.id}" class="w-6 h-6 accent-emerald-600 rounded-lg">`;
-    else input = `<select id="${h.id}" class="bg-white border rounded-xl p-2 text-[10px] font-bold"><option value="none">None</option><option value="husband">Husband</option><option value="wife">Wife</option></select>`;
-    div.innerHTML = `<div><p class="text-xs font-bold text-slate-700">${h.label}</p><p class="text-[9px] text-slate-400">${h.sub}</p></div>${input}`;
-    grid.appendChild(div);
-});
+        const div = document.createElement('div');
+        div.className = "flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100";
+        let input = h.type === 'number' 
+            ? `<input type="number" id="${h.id}" value="0" min="0" class="w-14 h-10 text-center bg-white border rounded-xl font-bold">`
+            : `<input type="checkbox" id="${h.id}" class="w-6 h-6 accent-emerald-600 rounded-lg">`;
+        
+        div.innerHTML = `<div><p class="text-xs font-bold text-slate-700">${displayLabel}</p><p class="text-[9px] text-slate-400 uppercase">${h.sub}</p></div>${input}`;
+        grid.appendChild(div);
+    });
+}
+
+renderHeirs(); // Initial call
 
 function calculate() {
-    // Simplified: Removed debt and wasiyyah
     const net = parseFloat(document.getElementById('totalEstate').value) || 0;
-
-    if (net <= 0) {
-        alert("Please enter a valid total estate amount.");
-        return;
-    }
+    if (net <= 0) return alert("Please enter total estate.");
 
     const h = {};
     heirCategories.forEach(cat => {
         const el = document.getElementById(cat.id);
-        if (el) {
-            h[cat.id] = cat.type === 'checkbox' ? el.checked : (cat.type === 'number' ? parseInt(el.value || 0) : el.value);
-        }
+        h[cat.id] = cat.type === 'checkbox' ? el.checked : parseInt(el.value || 0);
     });
 
     let results = [];
-    const hasChildren = (h.sons + h.daughters + h.grandsons + h.granddaughters) > 0;
+    const hasDescendants = (h.sons + h.daughters + h.grandsons + h.granddaughters) > 0;
+    const hasSons = (h.sons + h.grandsons) > 0;
 
-    // Fixed Shares (Ashab al-Furud)
-    if (h.spouses === 'husband') results.push({ name: "Husband", f: hasChildren ? 1/4 : 1/2 });
-    else if (h.spouses === 'wife') results.push({ name: "Wife", f: hasChildren ? 1/8 : 1/4 });
-    
+    // 1. Spouses
+    if (h.spouses > 0) {
+        let share = selectedGender === 'male' ? (hasDescendants ? 1/8 : 1/4) : (hasDescendants ? 1/4 : 1/2);
+        results.push({ name: selectedGender === 'male' ? "Wives" : "Husband", f: share });
+    }
+
+    // 2. Parents
     if (h.father) results.push({ name: "Father", f: 1/6 });
-    if (h.mother) results.push({ name: "Mother", f: hasChildren ? 1/6 : 1/3 });
+    if (h.mother) {
+        let mShare = (hasDescendants || (h.fullBrothers + h.fullSisters + h.paternalBrothers + h.paternalSisters) > 1) ? 1/6 : 1/3;
+        results.push({ name: "Mother", f: mShare });
+    }
 
+    // 3. Simple Residue Logic (Asabah)
     let used = results.reduce((s, r) => s + r.f, 0);
     let residue = 1 - used;
 
-    // Residuary logic (Asabah)
     if (residue > 0) {
         if (h.sons > 0 || h.daughters > 0) {
-            const p = (h.sons * 2) + h.daughters;
-            if (h.sons > 0) results.push({ name: "Sons", f: (residue / p) * 2 * h.sons });
-            if (h.daughters > 0) results.push({ name: "Daughters", f: (residue / p) * h.daughters });
-            residue = 0;
+            let p = (h.sons * 2) + h.daughters;
+            if (h.sons > 0) results.push({ name: "Sons", f: (residue/p) * 2 * h.sons });
+            if (h.daughters > 0) results.push({ name: "Daughters", f: (residue/p) * h.daughters });
         } else if (h.father) {
-            // Father takes residue if no sons/grandsons
-            const fIdx = results.findIndex(r => r.name === "Father");
-            if (fIdx !== -1) results[fIdx].f += residue;
-            else results.push({ name: "Father", f: residue });
-            residue = 0;
+            // Father takes residue if no sons
+            let fIdx = results.findIndex(r => r.name === "Father");
+            results[fIdx].f += residue;
+        } else {
+            results.push({ name: "Remaining Relatives/Treasury", f: residue });
         }
     }
 
-    // Handle remaining residue or empty cases
-    if (residue > 0.001 || results.length === 0) {
-        results.push({ name: "Bayt al-Mal (Treasury)", f: residue || 1.0, treasury: true });
-    }
-
     // Display Results
-    document.getElementById('resultsView').classList.remove('hidden');
+    const resView = document.getElementById('resultsView');
+    resView.classList.remove('hidden');
     document.getElementById('netDisplay').innerText = net.toLocaleString();
     const resCards = document.getElementById('resultCards');
     resCards.innerHTML = "";
     
     results.forEach(r => {
-        const amount = (r.f * net).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-        const percentage = (r.f * 100).toFixed(1);
-        resCards.innerHTML += `
-            <div class="p-5 flex justify-between items-center ${r.treasury ? 'bg-slate-50 ' : ''}">
-                <span class="font-bold text-slate-700 text-sm">${r.name}</span>
-                <div class="text-right">
-                    <p class="text-emerald-700 font-black">${amount}</p>
-                    <p class="text-[10px] text-slate-400 font-bold">${percentage}%</p>
-                </div>
-            </div>`;
+        resCards.innerHTML += `<div class="p-5 flex justify-between items-center"><span class="font-bold text-slate-700 text-sm">${r.name}</span><div class="text-right"><p class="text-emerald-700 font-black">${(r.f * net).toLocaleString(undefined, {maximumFractionDigits:0})}</p></div></div>`;
     });
-
-    document.getElementById('baytAlMal').classList.toggle('hidden', !results.some(r => r.treasury));
-    window.scrollTo({ top: document.getElementById('resultsView').offsetTop - 20, behavior: 'smooth' });
+    
+    window.scrollTo({ top: resView.offsetTop - 20, behavior: 'smooth' });
 }
     </script>
 </body>
 </html>
-
-
