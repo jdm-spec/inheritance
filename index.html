@@ -148,7 +148,7 @@
         <div class="flex gap-2 mb-4 flex-wrap">
             <span class="text-[9px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-1 rounded-full">● ₹ Money</span>
             <span class="text-[9px] font-bold uppercase tracking-wider text-teal-700 bg-teal-50 px-2 py-1 rounded-full">● 🏠 Property</span>
-            <span class="text-[9px] font-bold uppercase tracking-wider text-violet-700 bg-violet-50 px-2 py-1 rounded-full">● Both</span>
+            
         </div>
 
         <div id="heirGrid" class="space-y-3"></div>
@@ -237,7 +237,7 @@ const T = {
         lblPropertySub:'Enter total quantity and unit (e.g. 100 cent, 5 acres)',
         lblQty:'Quantity', lblUnit:'Unit / Place',
         lblHeirsTitle:'Select Heirs',
-        lblHeirsSub:'Each person can receive Money, Property, or Both',
+        lblHeirsSub:'Each person receives Money or Property',
         lblCalcBtn:'Calculate Now',
         lblPrint:'Print', lblShare:'Share',
         lblMoneyDist:'💰 Money Distribution',
@@ -298,7 +298,7 @@ const T = {
         lblPropertySub:'ആകെ അളവും യൂണിറ്റും നൽകുക (ഉദാ: 100 സെന്റ്, 5 ഏക്കർ)',
         lblQty:'അളവ്', lblUnit:'യൂണിറ്റ് / സ്ഥലം',
         lblHeirsTitle:'അവകാശികൾ',
-        lblHeirsSub:'ഓരോ ആൾക്കും പണം, സ്വത്ത്, അല്ലെങ്കിൽ രണ്ടും ലഭിക്കാം',
+        lblHeirsSub:'ഓരോ ആൾക്കും പണം അല്ലെങ്കിൽ സ്വത്ത് ലഭിക്കാം',
         lblCalcBtn:'കണക്കാക്കുക',
         lblPrint:'പ്രിന്റ്', lblShare:'പങ്കിടുക',
         lblMoneyDist:'💰 പണ വിതരണം',
@@ -474,11 +474,12 @@ function setPersonDist(catId, idx, val) {
 }
 
 function buildPersonRows(catId, count) {
-    while (personDist[catId].length < count) personDist[catId].push('both');
+    while (personDist[catId].length < count) personDist[catId].push('money');
+    personDist[catId] = personDist[catId].map(d => d === 'both' ? 'money' : d);
     personDist[catId].length = count;
     let html = '';
     for (let i = 0; i < count; i++) {
-        const d = personDist[catId][i] || 'both';
+        const d = personDist[catId][i] || 'money';
         const lbl = singularLabel(catId, i, count);
         html += `
         <div class="person-row">
@@ -487,10 +488,9 @@ function buildPersonRows(catId, count) {
                 <p class="text-[10px] font-bold text-slate-600 truncate">${lbl}</p>
                 <p class="text-[8px] text-slate-400 uppercase">${t('receives')}</p>
             </div>
-            <div class="tog w-40 flex-shrink-0" id="tog_${catId}_${i}">
+            <div class="tog w-32 flex-shrink-0" id="tog_${catId}_${i}">
                 <button data-v="money"    onclick="setPersonDist('${catId}',${i},'money')"    class="${d==='money'?'am':''}">${t('togMoney')}</button>
                 <button data-v="property" onclick="setPersonDist('${catId}',${i},'property')" class="${d==='property'?'ap':''}">${t('togProp')}</button>
-                <button data-v="both"     onclick="setPersonDist('${catId}',${i},'both')"     class="${d==='both'?'ab':''}">${t('togBoth')}</button>
             </div>
         </div>`;
     }
@@ -515,7 +515,7 @@ function onCheckChange(catId) {
     const cb   = document.getElementById('inp_' + catId);
     const area = document.getElementById('persons_' + catId);
     if (cb.checked) {
-        personDist[catId] = [personDist[catId][0] || 'both'];
+        personDist[catId] = [personDist[catId][0] === 'property' ? 'property' : 'money'];
         area.innerHTML = buildPersonRows(catId, 1);
         area.classList.remove('hidden');
     } else {
@@ -773,6 +773,27 @@ function fallbackCopy(text) {
 
 // Init
 renderHeirs();
+</script>
+
+<!-- Back to Top -->
+<button id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})"
+    class="fixed bottom-24 right-6 z-[100] w-12 h-12 rounded-full bg-white border border-slate-200 shadow-lg flex items-center justify-center text-emerald-700 hover:bg-emerald-50 active:scale-95 transition-all opacity-0 pointer-events-none"
+    style="transition: opacity 0.3s, transform 0.3s;">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"/>
+    </svg>
+</button>
+<script>
+    window.addEventListener('scroll', function() {
+        const btn = document.getElementById('backToTop');
+        if (window.scrollY > 300) {
+            btn.style.opacity = '1';
+            btn.style.pointerEvents = 'auto';
+        } else {
+            btn.style.opacity = '0';
+            btn.style.pointerEvents = 'none';
+        }
+    });
 </script>
 </body>
 </html>
