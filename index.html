@@ -7,13 +7,13 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Noto+Sans+Malayalam:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         html { scroll-behavior: smooth; overflow-x: hidden; }
         body { font-family: "Montserrat", sans-serif; -webkit-tap-highlight-color: transparent; }
+        .ml-font { font-family: "Noto Sans Malayalam", sans-serif; }
         input, select { font-size: 16px !important; }
 
-        /* 3-way toggle */
         .tog { display:flex; border-radius:8px; overflow:hidden; border:1.5px solid #e2e8f0; background:#f1f5f9; }
         .tog button {
             flex:1; padding:5px 2px; font-size:8px; font-weight:800;
@@ -38,6 +38,20 @@
             display:flex; align-items:center; justify-content:center;
             flex-shrink:0;
         }
+
+        /* Lang toggle */
+        .lang-btn { padding:6px 14px; border-radius:20px; font-size:11px; font-weight:700; cursor:pointer; transition:all 0.15s; border:none; }
+        .lang-btn.active { background:#059669; color:#fff; }
+        .lang-btn:not(.active) { background:#e2e8f0; color:#64748b; }
+
+        /* Print styles */
+        @media print {
+            header, #fabArea, #inputSection, footer, #heirsSection, .no-print { display:none !important; }
+            body { background:white !important; padding:0 !important; }
+            #resultsView { display:block !important; }
+            .print-header { display:block !important; }
+        }
+        .print-header { display:none; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 pb-24">
@@ -47,44 +61,52 @@
         <div class="flex items-center justify-between h-20">
             <a href="#" class="text-xl md:text-2xl tracking-widest text-emerald-400 font-bold leading-tight">
                 Al-Qismah
-                <span class="text-white font-light text-[10px] md:text-xs block tracking-normal">Islamic Inheritance Portal</span>
+                <span class="text-white font-light text-[10px] md:text-xs block tracking-normal" id="hdrSub">Islamic Inheritance Portal</span>
             </a>
+            <!-- Language Toggle -->
+            <div class="flex items-center gap-1 bg-emerald-800 rounded-full p-1">
+                <button class="lang-btn active" onclick="setLang('en')" id="btnEN">EN</button>
+                <button class="lang-btn ml-font" onclick="setLang('ml')" id="btnML">മല</button>
+            </div>
         </div>
     </nav>
 </header>
 
 <!-- FAB -->
-<div class="fixed bottom-6 right-6 z-[100]">
+<div id="fabArea" class="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 items-end">
     <button onclick="calculate()"
         class="bg-emerald-600 text-white h-14 px-5 rounded-full shadow-2xl hover:bg-emerald-700 transition-all active:scale-95 flex items-center gap-2">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
         </svg>
-        <span class="font-black text-xs tracking-widest uppercase">Calculate</span>
+        <span id="fabLabel" class="font-black text-xs tracking-widest uppercase">Calculate</span>
     </button>
 </div>
 
 <main class="px-4 pt-8 space-y-8 max-w-4xl mx-auto">
 
     <!-- Estate Details -->
+    <div id="inputSection" class="space-y-8">
     <div class="bg-white p-6 rounded-3xl shadow-md border border-slate-100">
-        <h2 class="text-sm font-bold text-emerald-800 mb-5 uppercase tracking-widest">Estate Details</h2>
+        <h2 id="lblEstateTitle" class="text-sm font-bold text-emerald-800 mb-5 uppercase tracking-widest">Estate Details</h2>
         <div class="space-y-5">
 
             <div>
-                <label class="text-xs font-bold text-emerald-600 uppercase tracking-wider">The Deceased is:</label>
+                <label id="lblDeceased" class="text-xs font-bold text-emerald-600 uppercase tracking-wider">The Deceased is:</label>
                 <div class="flex gap-3 mt-2">
                     <button type="button" onclick="setGender('male')" id="btnMale"
-                        class="flex-1 p-3 rounded-xl border-2 transition-all border-emerald-500 bg-emerald-50 text-emerald-700 text-sm font-bold">Male</button>
+                        class="flex-1 p-3 rounded-xl border-2 transition-all border-emerald-500 bg-emerald-50 text-emerald-700 text-sm font-bold">
+                        <span id="lblMale">Male</span></button>
                     <button type="button" onclick="setGender('female')" id="btnFemale"
-                        class="flex-1 p-3 rounded-xl border-2 transition-all border-slate-200 bg-slate-50 text-slate-400 text-sm font-bold">Female</button>
+                        class="flex-1 p-3 rounded-xl border-2 transition-all border-slate-200 bg-slate-50 text-slate-400 text-sm font-bold">
+                        <span id="lblFemale">Female</span></button>
                 </div>
                 <input type="hidden" id="deceasedGender" value="male">
             </div>
 
             <div>
-                <label class="text-xs font-bold text-emerald-600 uppercase tracking-wider">💰 Total Money Estate (₹)</label>
+                <label id="lblMoneyEstate" class="text-xs font-bold text-emerald-600 uppercase tracking-wider">💰 Total Money Estate (₹)</label>
                 <input type="number" id="totalEstate"
                     class="w-full mt-1 p-4 bg-slate-50 rounded-2xl border-2 border-transparent focus:border-emerald-500 outline-none font-bold text-lg"
                     placeholder="Enter rupee amount (optional)">
@@ -92,22 +114,22 @@
 
             <div class="flex items-center gap-3">
                 <div class="flex-1 h-px bg-slate-100"></div>
-                <span class="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Property / Land</span>
+                <span id="lblPropDivider" class="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Property / Land</span>
                 <div class="flex-1 h-px bg-slate-100"></div>
             </div>
 
             <div>
-                <label class="text-xs font-bold text-teal-600 uppercase tracking-wider">🏠 Property / Land / Asset</label>
-                <p class="text-[10px] text-slate-400 mt-0.5 mb-2">Enter total quantity and unit (e.g. 100 cent, 5 acres)</p>
+                <label id="lblProperty" class="text-xs font-bold text-teal-600 uppercase tracking-wider">🏠 Property / Land / Asset</label>
+                <p id="lblPropertySub" class="text-[10px] text-slate-400 mt-0.5 mb-2">Enter total quantity and unit (e.g. 100 cent, 5 acres)</p>
                 <div class="flex gap-3">
                     <div class="flex-1">
-                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Quantity</label>
+                        <label id="lblQty" class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Quantity</label>
                         <input type="number" id="propertyValue" min="0" step="any"
                             class="w-full mt-1 p-4 bg-slate-50 rounded-2xl border-2 border-transparent focus:border-teal-500 outline-none font-bold text-lg"
                             placeholder="e.g. 100">
                     </div>
                     <div class="flex-1">
-                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Unit / Place</label>
+                        <label id="lblUnit" class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Unit / Place</label>
                         <input type="text" id="propertyUnit"
                             class="w-full mt-1 p-4 bg-slate-50 rounded-2xl border-2 border-transparent focus:border-teal-500 outline-none font-bold text-lg"
                             placeholder="e.g. cent, acre">
@@ -119,11 +141,10 @@
     </div>
 
     <!-- Heirs -->
-    <div class="bg-white p-6 rounded-3xl shadow-md border border-slate-100">
-        <h2 class="text-sm font-bold text-emerald-800 mb-1 uppercase tracking-widest">Select Heirs</h2>
-        <p class="text-[10px] text-slate-400 mb-3 font-bold uppercase tracking-wide">Each person can receive Money, Property, or Both</p>
+    <div id="heirsSection" class="bg-white p-6 rounded-3xl shadow-md border border-slate-100">
+        <h2 id="lblHeirsTitle" class="text-sm font-bold text-emerald-800 mb-1 uppercase tracking-widest">Select Heirs</h2>
+        <p id="lblHeirsSub" class="text-[10px] text-slate-400 mb-3 font-bold uppercase tracking-wide">Each person can receive Money, Property, or Both</p>
 
-        <!-- Legend -->
         <div class="flex gap-2 mb-4 flex-wrap">
             <span class="text-[9px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-1 rounded-full">● ₹ Money</span>
             <span class="text-[9px] font-bold uppercase tracking-wider text-teal-700 bg-teal-50 px-2 py-1 rounded-full">● 🏠 Property</span>
@@ -135,17 +156,43 @@
         <div class="mt-8">
             <button onclick="calculate()"
                 class="w-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-black py-4 rounded-2xl shadow-lg transition-all active:scale-95 uppercase text-sm tracking-widest">
-                Calculate Now
+                <span id="lblCalcBtn">Calculate Now</span>
             </button>
         </div>
     </div>
+    </div><!-- end inputSection -->
 
     <!-- Results -->
     <div id="resultsView" class="hidden space-y-4 pb-12">
 
+        <!-- Print header (only shows on print) -->
+        <div class="print-header text-center mb-6">
+            <h1 class="text-2xl font-black text-emerald-800">Al-Qismah</h1>
+            <p class="text-sm text-slate-500">Islamic Inheritance Distribution</p>
+            <p class="text-xs text-slate-400 mt-1" id="printDate"></p>
+        </div>
+
+        <!-- Share / Print bar -->
+        <div class="no-print flex gap-2">
+            <button onclick="printResult()"
+                class="flex-1 flex items-center justify-center gap-2 bg-white border border-slate-200 text-slate-600 font-bold text-xs py-3 rounded-2xl shadow-sm hover:bg-slate-50 active:scale-95 transition-all uppercase tracking-widest">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                </svg>
+                <span id="lblPrint">Print</span>
+            </button>
+            <button onclick="shareResult()"
+                class="flex-1 flex items-center justify-center gap-2 bg-emerald-600 text-white font-bold text-xs py-3 rounded-2xl shadow-sm hover:bg-emerald-700 active:scale-95 transition-all uppercase tracking-widest">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+                </svg>
+                <span id="lblShare">Share</span>
+            </button>
+        </div>
+
         <div id="moneyResultBlock" class="hidden">
             <div class="bg-emerald-700 text-white p-6 rounded-3xl shadow-lg">
-                <p class="text-[10px] uppercase font-bold opacity-70">💰 Money Distribution</p>
+                <p id="lblMoneyDist" class="text-[10px] uppercase font-bold opacity-70">💰 Money Distribution</p>
                 <h3 id="netDisplay" class="text-2xl font-black mt-1"></h3>
             </div>
             <div class="bg-white rounded-3xl shadow-md overflow-hidden border border-slate-100 mt-2">
@@ -155,7 +202,7 @@
 
         <div id="propertyResultBlock" class="hidden">
             <div class="bg-teal-700 text-white p-6 rounded-3xl shadow-lg mt-2">
-                <p class="text-[10px] uppercase font-bold opacity-70">🏠 Property Distribution</p>
+                <p id="lblPropDist" class="text-[10px] uppercase font-bold opacity-70">🏠 Property Distribution</p>
                 <h3 id="propNetDisplay" class="text-2xl font-black mt-1"></h3>
             </div>
             <div class="bg-white rounded-3xl shadow-md overflow-hidden border border-slate-100 mt-2">
@@ -169,38 +216,237 @@
 <footer class="mt-20">
     <div class="max-w-7xl mx-auto text-center">
         <p class="text-xs uppercase tracking-widest font-medium">&copy; 2026 Al-Qismah Islamic Portal. All Rights Reserved.</p>
-        <p class="mt-4 text-xs tracking-widest font-medium">Developed By <a href="https://www.instagram.com/_irsh__aad._/" style="text-decoration: none;">Irshad Kolathur</a></p>
+        <p class="mt-4 text-xs tracking-widest font-medium">Developed By Irshad Kolathur</p>
     </div>
 </footer>
 
 <script>
 let selectedGender = 'male';
+let currentLang = 'en';
 
+// ── Translations ──────────────────────────────────────────────
+const T = {
+    en: {
+        hdrSub:'Islamic Inheritance Portal',
+        lblEstateTitle:'Estate Details',
+        lblDeceased:'The Deceased is:',
+        lblMale:'Male', lblFemale:'Female',
+        lblMoneyEstate:'💰 Total Money Estate (₹)',
+        lblPropDivider:'Property / Land',
+        lblProperty:'🏠 Property / Land / Asset',
+        lblPropertySub:'Enter total quantity and unit (e.g. 100 cent, 5 acres)',
+        lblQty:'Quantity', lblUnit:'Unit / Place',
+        lblHeirsTitle:'Select Heirs',
+        lblHeirsSub:'Each person can receive Money, Property, or Both',
+        lblCalcBtn:'Calculate Now',
+        lblPrint:'Print', lblShare:'Share',
+        lblMoneyDist:'💰 Money Distribution',
+        lblPropDist:'🏠 Property Distribution',
+        fabLabel:'Calculate',
+        moneyShare:'Money Share', propShare:'Property Share',
+        each:'each', remainder:'Remainder',
+        treasury:'Bayt al-Mal (Treasury)',
+        moneyPlaceholder:'Enter rupee amount (optional)',
+        receives:'Receives →',
+        alertAmounts:'Please enter Total Estate Amount and/or Property Value.',
+        alertHeirs:'Please select at least one heir.',
+        // heir names
+        spouseMale:'Surviving Wives', spouseFemale:'Surviving Husband',
+        sons:'Sons', daughters:'Daughters',
+        grandsons:'Grandsons', granddaughters:'Granddaughters',
+        father:'Father', mother:'Mother',
+        grandfather:'Paternal Grandfather',
+        paternalGrandmother:'Paternal Grandmother',
+        maternalGrandmother:'Maternal Grandmother',
+        fullBrothers:'Full Brothers', fullSisters:'Full Sisters',
+        paternalBrothers:'Paternal Brothers', paternalSisters:'Paternal Sisters',
+        maternalBrothers:'Maternal Brothers', maternalSisters:'Maternal Sisters',
+        fullNephews:"Full Brother's Sons", fullUncles:'Paternal Full Uncles',
+        // subs
+        subSpouse:'Must be legally married', subBio:'Biological only',
+        subSonSide:"From son's side", subDirect:'Direct biological',
+        subFatherFather:"Father's father", subFatherMother:"Father's mother",
+        subMotherMother:"Mother's mother", subSameParents:'Same father & mother',
+        subSameFather:'Same father', subSameMother:'Same mother',
+        subFatherBro:"Father's full brother", subEmpty:'',
+        // singular
+        singWife:'Wife', singHusband:'Husband',
+        singSon:'Son', singDaughter:'Daughter',
+        singGrandson:'Grandson', singGranddaughter:'Granddaughter',
+        singFather:'Father', singMother:'Mother',
+        singGrandfather:'Grandfather',
+        singPatGrandmother:'Paternal Grandmother',
+        singMatGrandmother:'Maternal Grandmother',
+        singFullBro:'Full Brother', singFullSis:'Full Sister',
+        singPatBro:'Paternal Brother', singPatSis:'Paternal Sister',
+        singMatBro:'Maternal Brother', singMatSis:'Maternal Sister',
+        singNephew:"Brother's Son", singUncle:'Paternal Uncle',
+        // results
+        wives:'Wives', husband:'Husband',
+        resultSons:'Sons', resultDaughters:'Daughters',
+        // toggle labels
+        togMoney:'₹ Money', togProp:'🏠 Prop', togBoth:'Both',
+    },
+    ml: {
+        hdrSub:'ഇസ്ലാമിക് അനന്തരാവകാശ കൽക്കുലേറ്റർ',
+        lblEstateTitle:'സ്വത്ത് വിവരങ്ങൾ',
+        lblDeceased:'മരണപ്പെട്ടത്:',
+        lblMale:'പുരുഷൻ', lblFemale:'സ്ത്രീ',
+        lblMoneyEstate:'💰 ആകെ പണം (₹)',
+        lblPropDivider:'സ്വത്ത് / ഭൂമി',
+        lblProperty:'🏠 സ്വത്ത് / ഭൂമി / ആസ്തി',
+        lblPropertySub:'ആകെ അളവും യൂണിറ്റും നൽകുക (ഉദാ: 100 സെന്റ്, 5 ഏക്കർ)',
+        lblQty:'അളവ്', lblUnit:'യൂണിറ്റ് / സ്ഥലം',
+        lblHeirsTitle:'അവകാശികൾ',
+        lblHeirsSub:'ഓരോ ആൾക്കും പണം, സ്വത്ത്, അല്ലെങ്കിൽ രണ്ടും ലഭിക്കാം',
+        lblCalcBtn:'കണക്കാക്കുക',
+        lblPrint:'പ്രിന്റ്', lblShare:'പങ്കിടുക',
+        lblMoneyDist:'💰 പണ വിതരണം',
+        lblPropDist:'🏠 സ്വത്ത് വിതരണം',
+        fabLabel:'കണക്കാക്കുക',
+        moneyShare:'പണ വിഹിതം', propShare:'സ്വത്ത് വിഹിതം',
+        each:'വീതം', remainder:'ശേഷം',
+        treasury:'ബൈത്തുൽ മാൽ (ഖജനാവ്)',
+        moneyPlaceholder:'തുക നൽകുക (ഓപ്ഷണൽ)',
+        receives:'ലഭിക്കുന്നത് →',
+        alertAmounts:'ആകെ തുകയോ സ്വത്ത് വിവരങ്ങളോ നൽകുക.',
+        alertHeirs:'ഒരു അവകാശിയെ എങ്കിലും തിരഞ്ഞെടുക്കുക.',
+        // heir names
+        spouseMale:'ഭാര്യ / ഭാര്യമാർ', spouseFemale:'ഭർത്താവ്',
+        sons:'ആൺമക്കൾ', daughters:'പെൺമക്കൾ',
+        grandsons:'പൗത്രന്മാർ', granddaughters:'പൗത്രിമാർ',
+        father:'പിതാവ്', mother:'മാതാവ്',
+        grandfather:'പിതാമഹൻ',
+        paternalGrandmother:'പിതൃ മുത്തശ്ശി',
+        maternalGrandmother:'മാതൃ മുത്തശ്ശി',
+        fullBrothers:'സഹോദരന്മാർ (ഉഭയ)', fullSisters:'സഹോദരിമാർ (ഉഭയ)',
+        paternalBrothers:'പിതൃ സഹോദരന്മാർ', paternalSisters:'പിതൃ സഹോദരിമാർ',
+        maternalBrothers:'മാതൃ സഹോദരന്മാർ', maternalSisters:'മാതൃ സഹോദരിമാർ',
+        fullNephews:'സഹോദര പുത്രന്മാർ', fullUncles:'പിതൃ അമ്മാവൻ',
+        // subs
+        subSpouse:'നിക്കാഹ് ചെയ്തവർ', subBio:'ജൈവ മക്കൾ മാത്രം',
+        subSonSide:'മകന്റെ ഭാഗത്ത്', subDirect:'നേരിട്ടുള്ള',
+        subFatherFather:'അച്ഛന്റെ അച്ഛൻ', subFatherMother:'അച്ഛന്റെ അമ്മ',
+        subMotherMother:'അമ്മയുടെ അമ്മ', subSameParents:'ഉഭയ ഭ്രാതൃ',
+        subSameFather:'ഒരേ പിതാവ്', subSameMother:'ഒരേ മാതാവ്',
+        subFatherBro:'അച്ഛന്റെ സഹോദരൻ', subEmpty:'',
+        // singular
+        singWife:'ഭാര്യ', singHusband:'ഭർത്താവ്',
+        singSon:'ആൺമകൻ', singDaughter:'പെൺമകൾ',
+        singGrandson:'പൗത്രൻ', singGranddaughter:'പൗത്രി',
+        singFather:'പിതാവ്', singMother:'മാതാവ്',
+        singGrandfather:'പിതാമഹൻ',
+        singPatGrandmother:'പിതൃ മുത്തശ്ശി',
+        singMatGrandmother:'മാതൃ മുത്തശ്ശി',
+        singFullBro:'സഹോദരൻ', singFullSis:'സഹോദരി',
+        singPatBro:'പിതൃ സഹോദരൻ', singPatSis:'പിതൃ സഹോദരി',
+        singMatBro:'മാതൃ സഹോദരൻ', singMatSis:'മാതൃ സഹോദരി',
+        singNephew:'സഹോദര പുത്രൻ', singUncle:'അമ്മാവൻ',
+        // results
+        wives:'ഭാര്യ/ഭാര്യമാർ', husband:'ഭർത്താവ്',
+        resultSons:'ആൺമക്കൾ', resultDaughters:'പെൺമക്കൾ',
+        // toggle labels
+        togMoney:'₹ പണം', togProp:'🏠 സ്വത്ത്', togBoth:'രണ്ടും',
+    }
+};
+
+function t(key) { return T[currentLang][key] || T['en'][key] || key; }
+
+function setLang(lang) {
+    currentLang = lang;
+    document.getElementById('btnEN').className = 'lang-btn' + (lang==='en' ? ' active' : '');
+    document.getElementById('btnML').className = 'lang-btn ml-font' + (lang==='ml' ? ' active' : '');
+    // update all static labels
+    const ids = ['hdrSub','lblEstateTitle','lblDeceased','lblMale','lblFemale',
+        'lblMoneyEstate','lblPropDivider','lblProperty','lblPropertySub',
+        'lblQty','lblUnit','lblHeirsTitle','lblHeirsSub','lblCalcBtn',
+        'lblPrint','lblShare','lblMoneyDist','lblPropDist','fabLabel'];
+    ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerText = t(id);
+    });
+    document.getElementById('totalEstate').placeholder = t('moneyPlaceholder');
+    // re-render heirs to update names
+    renderHeirs();
+    // apply Malayalam font to body if ML
+    document.body.classList.toggle('ml-font', lang === 'ml');
+}
+
+// ── Heir Definitions ──────────────────────────────────────────
 const heirCategories = [
-    { id:"spouses",             label:"Husband/Wife",        sub:"Must be legally married", type:"number" },
-    { id:"sons",                label:"Sons",                sub:"Biological only",          type:"number" },
-    { id:"daughters",           label:"Daughters",           sub:"Biological only",          type:"number" },
-    { id:"grandsons",           label:"Grandsons",           sub:"From son's side",          type:"number" },
-    { id:"granddaughters",      label:"Granddaughters",      sub:"From son's side",          type:"number" },
-    { id:"father",              label:"Father",              sub:"Direct biological",        type:"checkbox" },
-    { id:"mother",              label:"Mother",              sub:"Direct biological",        type:"checkbox" },
-    { id:"grandfather",         label:"Paternal Grandfather",sub:"Father's father",          type:"checkbox" },
-    { id:"paternalGrandmother", label:"Paternal Grandmother",sub:"Father's mother",          type:"checkbox" },
-    { id:"maternalGrandmother", label:"Maternal Grandmother",sub:"Mother's mother",          type:"checkbox" },
-    { id:"fullBrothers",        label:"Full Brothers",       sub:"Same father & mother",     type:"number" },
-    { id:"fullSisters",         label:"Full Sisters",        sub:"Same father & mother",     type:"number" },
-    { id:"paternalBrothers",    label:"Paternal Brothers",   sub:"Same father",              type:"number" },
-    { id:"paternalSisters",     label:"Paternal Sisters",    sub:"Same father",              type:"number" },
-    { id:"maternalBrothers",    label:"Maternal Brothers",   sub:"Same mother",              type:"number" },
-    { id:"maternalSisters",     label:"Maternal Sisters",    sub:"Same mother",              type:"number" },
-    { id:"fullNephews",         label:"Full Brother's Sons", sub:"",                         type:"number" },
-    { id:"fullUncles",          label:"Paternal Full Uncles",sub:"Father's full brother",    type:"number" }
+    { id:"spouses",             type:"number" },
+    { id:"sons",                type:"number" },
+    { id:"daughters",           type:"number" },
+    { id:"grandsons",           type:"number" },
+    { id:"granddaughters",      type:"number" },
+    { id:"father",              type:"checkbox" },
+    { id:"mother",              type:"checkbox" },
+    { id:"grandfather",         type:"checkbox" },
+    { id:"paternalGrandmother", type:"checkbox" },
+    { id:"maternalGrandmother", type:"checkbox" },
+    { id:"fullBrothers",        type:"number" },
+    { id:"fullSisters",         type:"number" },
+    { id:"paternalBrothers",    type:"number" },
+    { id:"paternalSisters",     type:"number" },
+    { id:"maternalBrothers",    type:"number" },
+    { id:"maternalSisters",     type:"number" },
+    { id:"fullNephews",         type:"number" },
+    { id:"fullUncles",          type:"number" }
 ];
 
-// personDist[catId][personIndex] = 'money' | 'property' | 'both'
-const personDist = {};
-heirCategories.forEach(h => personDist[h.id] = []);
+function heirLabel(id) {
+    const map = {
+        spouses: selectedGender === 'male' ? t('spouseMale') : t('spouseFemale'),
+        sons: t('sons'), daughters: t('daughters'),
+        grandsons: t('grandsons'), granddaughters: t('granddaughters'),
+        father: t('father'), mother: t('mother'),
+        grandfather: t('grandfather'),
+        paternalGrandmother: t('paternalGrandmother'),
+        maternalGrandmother: t('maternalGrandmother'),
+        fullBrothers: t('fullBrothers'), fullSisters: t('fullSisters'),
+        paternalBrothers: t('paternalBrothers'), paternalSisters: t('paternalSisters'),
+        maternalBrothers: t('maternalBrothers'), maternalSisters: t('maternalSisters'),
+        fullNephews: t('fullNephews'), fullUncles: t('fullUncles')
+    };
+    return map[id] || id;
+}
 
+function heirSub(id) {
+    const map = {
+        spouses: t('subSpouse'),
+        sons: t('subBio'), daughters: t('subBio'),
+        grandsons: t('subSonSide'), granddaughters: t('subSonSide'),
+        father: t('subDirect'), mother: t('subDirect'),
+        grandfather: t('subFatherFather'),
+        paternalGrandmother: t('subFatherMother'),
+        maternalGrandmother: t('subMotherMother'),
+        fullBrothers: t('subSameParents'), fullSisters: t('subSameParents'),
+        paternalBrothers: t('subSameFather'), paternalSisters: t('subSameFather'),
+        maternalBrothers: t('subSameMother'), maternalSisters: t('subSameMother'),
+        fullNephews: t('subEmpty'), fullUncles: t('subFatherBro')
+    };
+    return map[id] || '';
+}
+
+function singularLabel(id, i, total) {
+    const map = {
+        spouses: selectedGender === 'male' ? t('singWife') : t('singHusband'),
+        sons: t('singSon'), daughters: t('singDaughter'),
+        grandsons: t('singGrandson'), granddaughters: t('singGranddaughter'),
+        father: t('singFather'), mother: t('singMother'),
+        grandfather: t('singGrandfather'),
+        paternalGrandmother: t('singPatGrandmother'),
+        maternalGrandmother: t('singMatGrandmother'),
+        fullBrothers: t('singFullBro'), fullSisters: t('singFullSis'),
+        paternalBrothers: t('singPatBro'), paternalSisters: t('singPatSis'),
+        maternalBrothers: t('singMatBro'), maternalSisters: t('singMatSis'),
+        fullNephews: t('singNephew'), fullUncles: t('singUncle')
+    };
+    const base = map[id] || id;
+    return total > 1 ? `${base} ${i + 1}` : base;
+}
+
+// ── Gender ────────────────────────────────────────────────────
 function setGender(gender) {
     selectedGender = gender;
     document.getElementById('deceasedGender').value = gender;
@@ -214,23 +460,9 @@ function setGender(gender) {
     renderHeirs();
 }
 
-// Build singular label for a person within category
-function personLabel(catId, catLabel, i, total) {
-    const singulars = {
-        spouses: selectedGender === 'male' ? 'Wife' : 'Husband',
-        sons: 'Son', daughters: 'Daughter',
-        grandsons: 'Grandson', granddaughters: 'Granddaughter',
-        father: 'Father', mother: 'Mother',
-        grandfather: 'Grandfather', paternalGrandmother: 'Paternal Grandmother',
-        maternalGrandmother: 'Maternal Grandmother',
-        fullBrothers: 'Full Brother', fullSisters: 'Full Sister',
-        paternalBrothers: 'Paternal Brother', paternalSisters: 'Paternal Sister',
-        maternalBrothers: 'Maternal Brother', maternalSisters: 'Maternal Sister',
-        fullNephews: "Brother's Son", fullUncles: 'Paternal Uncle'
-    };
-    const base = singulars[catId] || catLabel;
-    return total > 1 ? `${base} ${i + 1}` : base;
-}
+// ── Per-person dist ───────────────────────────────────────────
+const personDist = {};
+heirCategories.forEach(h => personDist[h.id] = []);
 
 function setPersonDist(catId, idx, val) {
     personDist[catId][idx] = val;
@@ -238,28 +470,27 @@ function setPersonDist(catId, idx, val) {
     if (!tog) return;
     tog.querySelectorAll('button').forEach(b => b.classList.remove('am','ap','ab'));
     const btn = tog.querySelector(`[data-v="${val}"]`);
-    if (btn) btn.classList.add(val === 'money' ? 'am' : val === 'property' ? 'ap' : 'ab');
+    if (btn) btn.classList.add(val==='money'?'am':val==='property'?'ap':'ab');
 }
 
 function buildPersonRows(catId, count) {
-    // Ensure array has correct length, defaulting new slots to 'both'
     while (personDist[catId].length < count) personDist[catId].push('both');
-    personDist[catId].length = count; // trim if reduced
-
+    personDist[catId].length = count;
     let html = '';
     for (let i = 0; i < count; i++) {
         const d = personDist[catId][i] || 'both';
-        const lbl = personLabel(catId, '', i, count);
+        const lbl = singularLabel(catId, i, count);
         html += `
         <div class="person-row">
-            <div class="person-num">${i + 1}</div>
+            <div class="person-num">${i+1}</div>
             <div class="flex-1 min-w-0">
                 <p class="text-[10px] font-bold text-slate-600 truncate">${lbl}</p>
+                <p class="text-[8px] text-slate-400 uppercase">${t('receives')}</p>
             </div>
-            <div class="tog w-44 flex-shrink-0" id="tog_${catId}_${i}">
-                <button data-v="money"    onclick="setPersonDist('${catId}',${i},'money')"    class="${d==='money'?'am':''}">₹ Money</button>
-                <button data-v="property" onclick="setPersonDist('${catId}',${i},'property')" class="${d==='property'?'ap':''}">🏠 Prop</button>
-                <button data-v="both"     onclick="setPersonDist('${catId}',${i},'both')"     class="${d==='both'?'ab':''}">Both</button>
+            <div class="tog w-40 flex-shrink-0" id="tog_${catId}_${i}">
+                <button data-v="money"    onclick="setPersonDist('${catId}',${i},'money')"    class="${d==='money'?'am':''}">${t('togMoney')}</button>
+                <button data-v="property" onclick="setPersonDist('${catId}',${i},'property')" class="${d==='property'?'ap':''}">${t('togProp')}</button>
+                <button data-v="both"     onclick="setPersonDist('${catId}',${i},'both')"     class="${d==='both'?'ab':''}">${t('togBoth')}</button>
             </div>
         </div>`;
     }
@@ -269,27 +500,27 @@ function buildPersonRows(catId, count) {
 function onCountChange(catId) {
     const input = document.getElementById('inp_' + catId);
     const count = parseInt(input.value || 0);
-    const personArea = document.getElementById('persons_' + catId);
+    const area  = document.getElementById('persons_' + catId);
     if (count > 0) {
-        personArea.innerHTML = buildPersonRows(catId, count);
-        personArea.classList.remove('hidden');
+        area.innerHTML = buildPersonRows(catId, count);
+        area.classList.remove('hidden');
     } else {
-        personArea.classList.add('hidden');
-        personArea.innerHTML = '';
+        area.classList.add('hidden');
+        area.innerHTML = '';
         personDist[catId] = [];
     }
 }
 
 function onCheckChange(catId) {
-    const cb = document.getElementById('inp_' + catId);
-    const personArea = document.getElementById('persons_' + catId);
+    const cb   = document.getElementById('inp_' + catId);
+    const area = document.getElementById('persons_' + catId);
     if (cb.checked) {
         personDist[catId] = [personDist[catId][0] || 'both'];
-        personArea.innerHTML = buildPersonRows(catId, 1);
-        personArea.classList.remove('hidden');
+        area.innerHTML = buildPersonRows(catId, 1);
+        area.classList.remove('hidden');
     } else {
-        personArea.classList.add('hidden');
-        personArea.innerHTML = '';
+        area.classList.add('hidden');
+        area.innerHTML = '';
         personDist[catId] = [];
     }
 }
@@ -297,69 +528,73 @@ function onCheckChange(catId) {
 function renderHeirs() {
     const grid = document.getElementById('heirGrid');
     grid.innerHTML = '';
-
     heirCategories.forEach(h => {
-        let label = h.label;
-        if (h.id === 'spouses') label = selectedGender === 'male' ? 'Surviving Wives' : 'Surviving Husband';
-
+        const label = heirLabel(h.id);
+        const sub   = heirSub(h.id);
         const wrapper = document.createElement('div');
         wrapper.className = 'bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden';
 
         let headerHtml = '';
         if (h.type === 'number') {
+            const curVal = document.getElementById('inp_' + h.id) ? document.getElementById('inp_' + h.id).value : '0';
             headerHtml = `
             <div class="flex items-center justify-between p-4">
                 <div class="flex-1 min-w-0">
                     <p class="text-xs font-bold text-slate-700">${label}</p>
-                    <p class="text-[9px] text-slate-400 uppercase tracking-tighter">${h.sub}</p>
+                    <p class="text-[9px] text-slate-400 uppercase tracking-tighter">${sub}</p>
                 </div>
-                <input type="number" id="inp_${h.id}" value="0" min="0" max="20"
+                <input type="number" id="inp_${h.id}" value="${curVal}" min="0" max="20"
                     oninput="onCountChange('${h.id}')"
                     class="w-14 h-10 text-center bg-white border border-slate-200 rounded-xl font-bold text-sm focus:border-emerald-500 outline-none ml-2">
             </div>`;
         } else {
+            const curChecked = document.getElementById('inp_' + h.id) ? document.getElementById('inp_' + h.id).checked : false;
             headerHtml = `
             <div class="flex items-center justify-between p-4">
                 <div class="flex-1 min-w-0">
                     <p class="text-xs font-bold text-slate-700">${label}</p>
-                    <p class="text-[9px] text-slate-400 uppercase tracking-tighter">${h.sub}</p>
+                    <p class="text-[9px] text-slate-400 uppercase tracking-tighter">${sub}</p>
                 </div>
-                <input type="checkbox" id="inp_${h.id}"
+                <input type="checkbox" id="inp_${h.id}" ${curChecked?'checked':''}
                     onchange="onCheckChange('${h.id}')"
                     class="w-5 h-5 accent-emerald-600 ml-2">
             </div>`;
         }
 
+        // Re-render person rows if already open
+        const existingPersons = personDist[h.id] || [];
+        const personHtml = existingPersons.length > 0
+            ? buildPersonRows(h.id, existingPersons.length)
+            : '';
+
         wrapper.innerHTML = `
             ${headerHtml}
-            <div id="persons_${h.id}" class="hidden px-3 pb-3 space-y-0"></div>
+            <div id="persons_${h.id}" class="${existingPersons.length > 0 ? '' : 'hidden'} px-3 pb-3 space-y-0">
+                ${personHtml}
+            </div>
         `;
         grid.appendChild(wrapper);
     });
 }
 
+// ── Share Logic ───────────────────────────────────────────────
 function getFractionLabel(f, name) {
-    if (name.includes("Bayt al-Mal")) return "Remainder";
-    const t = 0.001;
-    if (Math.abs(f - 1/2) < t) return "1/2";
-    if (Math.abs(f - 1/3) < t) return "1/3";
-    if (Math.abs(f - 1/4) < t) return "1/4";
-    if (Math.abs(f - 1/6) < t) return "1/6";
-    if (Math.abs(f - 1/8) < t) return "1/8";
-    if (Math.abs(f - 2/3) < t) return "2/3";
+    if (name.includes("Bayt") || name.includes("ബൈത്ത്")) return t('remainder');
+    const tol = 0.001;
+    if (Math.abs(f-1/2)<tol) return "1/2";
+    if (Math.abs(f-1/3)<tol) return "1/3";
+    if (Math.abs(f-1/4)<tol) return "1/4";
+    if (Math.abs(f-1/6)<tol) return "1/6";
+    if (Math.abs(f-1/8)<tol) return "1/8";
+    if (Math.abs(f-2/3)<tol) return "2/3";
     return "Residue";
 }
 
-// Build a virtual heir set for calculation.
-// Returns: { catId -> count } for heirs whose person-level dist includes the pool.
-// pool: 'money' | 'property'
 function buildPoolCounts(pool) {
     const counts = {};
     heirCategories.forEach(cat => {
-        const distArr = personDist[cat.id];
-        if (!distArr || distArr.length === 0) { counts[cat.id] = 0; return; }
-        // count people whose dist includes this pool
-        counts[cat.id] = distArr.filter(d => d === pool || d === 'both').length;
+        const arr = personDist[cat.id];
+        counts[cat.id] = (!arr || arr.length===0) ? 0 : arr.filter(d => d===pool||d==='both').length;
     });
     return counts;
 }
@@ -367,31 +602,33 @@ function buildPoolCounts(pool) {
 function computeSharesFromCounts(vals) {
     let results = [];
     let remaining = 1.0;
-    const hasDescendants = (vals.sons + vals.daughters + (vals.grandsons||0) + (vals.granddaughters||0)) > 0;
+    const hasDesc = (vals.sons + vals.daughters + (vals.grandsons||0) + (vals.granddaughters||0)) > 0;
 
     if (vals.spouses > 0) {
-        let f = selectedGender === 'male' ? (hasDescendants ? 1/8 : 1/4) : (hasDescendants ? 1/4 : 1/2);
-        results.push({ name: selectedGender === 'male' ? 'Wives' : 'Husband', count: vals.spouses, f, perPerson: f / vals.spouses });
+        let f = selectedGender==='male' ? (hasDesc?1/8:1/4) : (hasDesc?1/4:1/2);
+        results.push({ name: selectedGender==='male'?t('wives'):t('husband'), count:vals.spouses, f, perPerson:f/vals.spouses });
         remaining -= f;
     }
-    if (vals.father > 0) { results.push({ name:'Father', count:1, f:1/6, perPerson:1/6 }); remaining -= 1/6; }
-    if (vals.mother > 0) {
-        let ms = hasDescendants ? 1/6 : 1/3;
-        results.push({ name:'Mother', count:1, f:ms, perPerson:ms }); remaining -= ms;
+    if (vals.father > 0) {
+        results.push({ name:t('father'), count:1, f:1/6, perPerson:1/6 }); remaining -= 1/6;
     }
-    if (remaining > 0.001 && (vals.sons > 0 || vals.daughters > 0)) {
-        let parts = (vals.sons * 2) + vals.daughters;
-        if (vals.sons > 0) {
-            let f = (remaining / parts) * 2 * vals.sons;
-            results.push({ name:'Sons', count:vals.sons, f, perPerson: f / vals.sons });
+    if (vals.mother > 0) {
+        let ms = hasDesc?1/6:1/3;
+        results.push({ name:t('mother'), count:1, f:ms, perPerson:ms }); remaining -= ms;
+    }
+    if (remaining > 0.001 && (vals.sons>0||vals.daughters>0)) {
+        let parts = (vals.sons*2) + vals.daughters;
+        if (vals.sons>0) {
+            let f = (remaining/parts)*2*vals.sons;
+            results.push({ name:t('resultSons'), count:vals.sons, f, perPerson:f/vals.sons });
         }
-        if (vals.daughters > 0) {
-            let f = (remaining / parts) * vals.daughters;
-            results.push({ name:'Daughters', count:vals.daughters, f, perPerson: f / vals.daughters });
+        if (vals.daughters>0) {
+            let f = (remaining/parts)*vals.daughters;
+            results.push({ name:t('resultDaughters'), count:vals.daughters, f, perPerson:f/vals.daughters });
         }
         remaining = 0;
     }
-    if (remaining > 0.001) results.push({ name:'Bayt al-Mal (Treasury)', count:1, f:remaining, perPerson:remaining, isTreasury:true });
+    if (remaining > 0.001) results.push({ name:t('treasury'), count:1, f:remaining, perPerson:remaining, isTreasury:true });
     return results;
 }
 
@@ -399,20 +636,20 @@ function renderMoneyCards(results, net) {
     const cards = document.getElementById('resultCards');
     cards.innerHTML = '';
     results.forEach(r => {
-        const total = (r.f * net).toLocaleString('en-IN', { maximumFractionDigits:0 });
-        const each  = r.count > 1 ? '(₹' + (r.perPerson * net).toLocaleString('en-IN', { maximumFractionDigits:0 }) + ' each)' : '';
+        const total = (r.f*net).toLocaleString('en-IN',{maximumFractionDigits:0});
+        const eachAmt = r.count>1 ? `(₹${(r.perPerson*net).toLocaleString('en-IN',{maximumFractionDigits:0})} ${t('each')})` : '';
         cards.innerHTML += `
         <div class="p-5 flex justify-between items-center ${r.isTreasury?'bg-slate-50':'bg-white'}">
             <div>
-                <p class="font-bold text-slate-700 text-sm">${r.name}${r.count > 1 ? ' <span class="text-slate-400 font-normal text-xs">×'+r.count+'</span>' : ''}</p>
+                <p class="font-bold text-slate-700 text-sm">${r.name}${r.count>1?` <span class='text-slate-400 font-normal text-xs'>×${r.count}</span>`:''}</p>
                 <p class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full w-fit mt-1">
-                    ${getFractionLabel(r.f, r.name)} &bull; ${(r.f*100).toFixed(2)}%
+                    ${getFractionLabel(r.f,r.name)} &bull; ${(r.f*100).toFixed(2)}%
                 </p>
-                ${r.count > 1 ? `<p class="text-[9px] text-slate-400 font-bold mt-0.5">${each}</p>` : ''}
+                ${r.count>1?`<p class="text-[9px] text-slate-400 font-bold mt-0.5">${eachAmt}</p>`:''}
             </div>
             <div class="text-right">
                 <p class="text-emerald-700 font-black text-lg">₹${total}</p>
-                <p class="text-[9px] text-slate-400 uppercase font-bold tracking-tighter">Money Share</p>
+                <p class="text-[9px] text-slate-400 uppercase font-bold tracking-tighter">${t('moneyShare')}</p>
             </div>
         </div>`;
     });
@@ -422,69 +659,119 @@ function renderPropertyCards(results, propValue, unit) {
     const cards = document.getElementById('propResultCards');
     cards.innerHTML = '';
     results.forEach(r => {
-        const total = parseFloat((r.f * propValue).toFixed(4)).toLocaleString('en-IN', { maximumFractionDigits:4 });
-        const each  = r.count > 1
-            ? '(' + parseFloat((r.perPerson * propValue).toFixed(4)).toLocaleString('en-IN', {maximumFractionDigits:4}) + ' ' + unit + ' each)'
+        const total = parseFloat((r.f*propValue).toFixed(4)).toLocaleString('en-IN',{maximumFractionDigits:4});
+        const eachAmt = r.count>1
+            ? `(${parseFloat((r.perPerson*propValue).toFixed(4)).toLocaleString('en-IN',{maximumFractionDigits:4})} ${unit} ${t('each')})`
             : '';
         cards.innerHTML += `
         <div class="p-5 flex justify-between items-center ${r.isTreasury?'bg-slate-50':'bg-white'}">
             <div>
-                <p class="font-bold text-slate-700 text-sm">${r.name}${r.count > 1 ? ' <span class="text-slate-400 font-normal text-xs">×'+r.count+'</span>' : ''}</p>
+                <p class="font-bold text-slate-700 text-sm">${r.name}${r.count>1?` <span class='text-slate-400 font-normal text-xs'>×${r.count}</span>`:''}</p>
                 <p class="text-[10px] font-bold text-teal-600 bg-teal-50 px-2 py-0.5 rounded-full w-fit mt-1">
-                    ${getFractionLabel(r.f, r.name)} &bull; ${(r.f*100).toFixed(2)}%
+                    ${getFractionLabel(r.f,r.name)} &bull; ${(r.f*100).toFixed(2)}%
                 </p>
-                ${r.count > 1 ? `<p class="text-[9px] text-slate-400 font-bold mt-0.5">${each}</p>` : ''}
+                ${r.count>1?`<p class="text-[9px] text-slate-400 font-bold mt-0.5">${eachAmt}</p>`:''}
             </div>
             <div class="text-right">
                 <p class="text-teal-700 font-black text-lg">${total} <span class="text-sm font-bold">${unit}</span></p>
-                <p class="text-[9px] text-slate-400 uppercase font-bold tracking-tighter">Property Share</p>
+                <p class="text-[9px] text-slate-400 uppercase font-bold tracking-tighter">${t('propShare')}</p>
             </div>
         </div>`;
     });
 }
+
+// ── Calculate ─────────────────────────────────────────────────
+let lastNet=0, lastPropValue=0, lastPropUnit='';
 
 function calculate() {
     const net       = parseFloat(document.getElementById('totalEstate').value)  || 0;
     const propValue = parseFloat(document.getElementById('propertyValue').value) || 0;
     const propUnit  = (document.getElementById('propertyUnit').value||'').trim() || 'units';
 
-    if (net <= 0 && propValue <= 0) return alert("Please enter Total Estate Amount and/or Property Value.");
+    if (net<=0 && propValue<=0) return alert(t('alertAmounts'));
+    const anyHeir = heirCategories.some(cat => (personDist[cat.id]||[]).length>0);
+    if (!anyHeir) return alert(t('alertHeirs'));
 
-    // Check at least one heir selected
-    const anyHeir = heirCategories.some(cat => (personDist[cat.id]||[]).length > 0);
-    if (!anyHeir) return alert("Please select at least one heir.");
+    lastNet=net; lastPropValue=propValue; lastPropUnit=propUnit;
 
     const moneyCounts    = buildPoolCounts('money');
     const propertyCounts = buildPoolCounts('property');
+    const hasMoneyHeirs    = Object.values(moneyCounts).some(v=>v>0);
+    const hasPropertyHeirs = Object.values(propertyCounts).some(v=>v>0);
 
-    const hasMoneyHeirs    = Object.values(moneyCounts).some(v => v > 0);
-    const hasPropertyHeirs = Object.values(propertyCounts).some(v => v > 0);
-
-    const resView = document.getElementById('resultsView');
-    resView.classList.remove('hidden');
+    document.getElementById('resultsView').classList.remove('hidden');
+    document.getElementById('printDate').innerText = new Date().toLocaleDateString();
 
     const moneyBlock = document.getElementById('moneyResultBlock');
-    if (net > 0 && hasMoneyHeirs) {
+    if (net>0 && hasMoneyHeirs) {
         moneyBlock.classList.remove('hidden');
-        document.getElementById('netDisplay').innerText = '₹' + net.toLocaleString('en-IN');
+        document.getElementById('netDisplay').innerText = '₹'+net.toLocaleString('en-IN');
         renderMoneyCards(computeSharesFromCounts(moneyCounts), net);
-    } else {
-        moneyBlock.classList.add('hidden');
-    }
+    } else { moneyBlock.classList.add('hidden'); }
 
     const propBlock = document.getElementById('propertyResultBlock');
-    if (propValue > 0 && hasPropertyHeirs) {
+    if (propValue>0 && hasPropertyHeirs) {
         propBlock.classList.remove('hidden');
         document.getElementById('propNetDisplay').innerText =
-            propValue.toLocaleString('en-IN', {maximumFractionDigits:4}) + ' ' + propUnit;
+            propValue.toLocaleString('en-IN',{maximumFractionDigits:4})+' '+propUnit;
         renderPropertyCards(computeSharesFromCounts(propertyCounts), propValue, propUnit);
-    } else {
-        propBlock.classList.add('hidden');
-    }
+    } else { propBlock.classList.add('hidden'); }
 
-    window.scrollTo({ top: resView.offsetTop - 100, behavior: 'smooth' });
+    window.scrollTo({ top: document.getElementById('resultsView').offsetTop - 100, behavior:'smooth' });
 }
 
+// ── Print ─────────────────────────────────────────────────────
+function printResult() {
+    window.print();
+}
+
+// ── Share ─────────────────────────────────────────────────────
+function shareResult() {
+    // Build plain text summary
+    let text = `📜 Al-Qismah – ${currentLang==='ml'?'അനന്തരാവകാശ വിതരണം':'Inheritance Distribution'}\n`;
+    text += '━━━━━━━━━━━━━━━━━━━━━\n';
+
+    const moneyCards = document.getElementById('resultCards');
+    if (!document.getElementById('moneyResultBlock').classList.contains('hidden')) {
+        text += `\n💰 ${t('lblMoneyDist')}: ₹${lastNet.toLocaleString('en-IN')}\n`;
+        moneyCards.querySelectorAll('[class*="p-5"]').forEach(card => {
+            const name = card.querySelector('p.font-bold')?.innerText || '';
+            const amt  = card.querySelector('p.text-emerald-700')?.innerText || '';
+            const pct  = card.querySelector('p.text-\\[10px\\]')?.innerText || '';
+            text += `  • ${name}: ${amt} (${pct})\n`;
+        });
+    }
+
+    const propCards = document.getElementById('propResultCards');
+    if (!document.getElementById('propertyResultBlock').classList.contains('hidden')) {
+        text += `\n🏠 ${t('lblPropDist')}: ${lastPropValue} ${lastPropUnit}\n`;
+        propCards.querySelectorAll('[class*="p-5"]').forEach(card => {
+            const name = card.querySelector('p.font-bold')?.innerText || '';
+            const amt  = card.querySelector('p.text-teal-700')?.innerText || '';
+            const pct  = card.querySelector('p.text-\\[10px\\]')?.innerText || '';
+            text += `  • ${name}: ${amt} (${pct})\n`;
+        });
+    }
+
+    text += '\n━━━━━━━━━━━━━━━━━━━━━\nAl-Qismah | Islamic Inheritance Portal';
+
+    if (navigator.share) {
+        navigator.share({ title: 'Al-Qismah Inheritance Result', text })
+            .catch(() => fallbackCopy(text));
+    } else {
+        fallbackCopy(text);
+    }
+}
+
+function fallbackCopy(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        alert(currentLang==='ml' ? 'ഫലം കോപ്പി ചെയ്തു!' : 'Result copied to clipboard!');
+    }).catch(() => {
+        alert(currentLang==='ml' ? 'കോപ്പി ചെയ്യാൻ കഴിഞ്ഞില്ല' : 'Could not copy. Please screenshot the results.');
+    });
+}
+
+// Init
 renderHeirs();
 </script>
 </body>
