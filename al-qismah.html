@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Al-Qismah | Professional Farāʾiḍ Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Noto+Sans+Malayalam:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        html { scroll-behavior: smooth; overflow-x: hidden; }
+        body { font-family: "Montserrat", sans-serif; -webkit-tap-highlight-color: transparent; }
+        body.ml { font-family: "Noto Sans Malayalam", sans-serif; }
+        input, select { font-size: 16px !important; }
+
+        .tog { display:flex; border-radius:8px; overflow:hidden; border:1.5px solid #e2e8f0; background:#f1f5f9; }
+        .tog button {
+            flex:1; padding:5px 2px; font-size:8px; font-weight:800;
+            letter-spacing:0.04em; text-transform:uppercase; border:none;
+            background:transparent; cursor:pointer; color:#94a3b8; transition:all 0.14s;
+            white-space:nowrap;
+        }
+        .tog button.am { background:#059669; color:#fff; }
+        .tog button.ap { background:#0d9488; color:#fff; }
+        .tog button.ab { background:#7c3aed; color:#fff; }
+
+        .person-row {
+            display:flex; align-items:center; gap:8px;
+            padding:8px 10px; background:#f8fafc;
+            border-radius:12px; border:1px solid #e2e8f0; margin-top:6px;
+        }
+        .person-num {
+            width:22px; height:22px; border-radius:50%;
+            background:#e2e8f0; color:#64748b;
+            font-size:9px; font-weight:800;
+            display:flex; align-items:center; justify-content:center; flex-shrink:0;
+        }
+
+        /* auto-calc glow */
+        .calc-display {
+            background: linear-gradient(135deg, #ecfdf5, #f0fdfa);
+            border: 2px solid #34d399;
+            border-radius: 16px;
+            padding: 14px 16px;
+            margin-top: 8px;
+        }
+
+        @media print {
+            header, footer, #heirSection, .fab-btn, .share-bar { display:none !important; }
+            body { background:white !important; }
+            #resultsView { display:block !important; }
+            .print-header { display:block !important; }
+        }
+        .print-header { display:none; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 pb-24">
+
+<header class="bg-emerald-900 text-white shadow-xl sticky top-0 z-50">
+    <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-20">
+            <a href="#" class="text-xl md:text-2xl tracking-widest text-emerald-400 font-bold leading-tight">
+                Al-Qismah
+                <span class="text-white font-light text-[10px] md:text-xs block tracking-normal" id="hdr-sub">Islamic Inheritance Portal</span>
+            </a>
+            <button onclick="toggleLang()" id="langBtn"
+                class="flex items-center gap-2 bg-emerald-800 hover:bg-emerald-700 px-3 py-2 rounded-xl text-xs font-bold tracking-wider transition-all">
+                <span id="langBtnLabel">മലയാളം</span>
+            </button>
+        </div>
+    </nav>
+</header>
+
+<!-- FAB -->
+<div class="fab-btn fixed bottom-6 right-6 z-[100]">
+    <button onclick="calculate()"
+        class="bg-emerald-600 text-white h-14 px-5 rounded-full shadow-2xl hover:bg-emerald-700 transition-all active:scale-95 flex items-center gap-2">
+        <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+        </svg>
+        <span class="font-black text-xs tracking-widest uppercase" id="fabLabel">Calculate</span>
+    </button>
+</div>
+
+<main class="px-4 pt-8 space-y-8 max-w-4xl mx-auto">
+
+    <!-- Estate Details -->
+    <div class="bg-white p-6 rounded-3xl shadow-md border border-slate-100">
+        <h2 class="text-sm font-bold text-emerald-800 mb-5 uppercase tracking-widest" id="lbl-estateTitle">Estate Details</h2>
+        <div class="space-y-5">
+
+            <!-- Gender -->
+            <div>
+                <label class="text-xs font-bold text-emerald-600 uppercase tracking-wider" id="lbl-deceasedIs">The Deceased is:</label>
+                <div class="flex gap-3 mt-2">
+                    <button type="button" onclick="setGender('male')" id="btnMale"
+                        class="flex-1 p-3 rounded-xl border-2 transition-all border-emerald-500 bg-emerald-50 text-emerald-700 text-sm font-bold">Male</button>
+                    <button type="button" onclick="setGender('female')" id="btnFemale"
+                        class="flex-1 p-3 rounded-xl border-2 transition-all border-slate-200 bg-slate-50 text-slate-400 text-sm font-bold">Female</button>
+                </div>
+                <input type="hidden" id="deceasedGender" value="male">
+            </div>
+
+            <!-- Money -->
+            <div>
+                <label class="text-xs font-bold text-emerald-600 uppercase tracking-wider" id="lbl-moneyEstate">💰 Total Money Estate (₹)</label>
+                <input type="number" id="totalEstate"
+                    class="w-full mt-1 p-4 bg-slate-50 rounded-2xl border-2 border-transparent focus:border-emerald-500 outline-none font-bold text-lg"
+                    placeholder="Enter rupee amount (optional)">
+            </div>
+
+            <!-- Divider -->
+            <div class="flex items-center gap-3">
+                <div class="flex-1 h-px bg-slate-100"></div>
+                <span class="text-[10px] uppercase font-bold text-slate-400 tracking-widest" id="lbl-propDivider">Property / Land</span>
+                <div class="flex-1 h-px bg-slate-100"></div>
+            </div>
+
+            <!-- Property section -->
+            <div>
+                <label class="text-xs font-bold text-teal-600 uppercase tracking-wider" id="lbl-propertyTitle">🏠 Property / Land / Asset</label>
+                <p class="text-[10px] text-slate-400 mt-0.5 mb-3" id="lbl-propHint">Enter quantity, unit and rate — total value auto-calculates</p>
+
+                <!-- Row 1: Quantity + Unit -->
+                <div class="flex gap-3 mb-3">
+                    <div class="flex-1">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider" id="lbl-qty">Quantity</label>
+                        <input type="number" id="propertyValue" min="0" step="any"
+                            oninput="calcPropertyTotal()"
+                            class="w-full mt-1 p-4 bg-slate-50 rounded-2xl border-2 border-transparent focus:border-teal-500 outline-none font-bold text-lg"
+                            placeholder="e.g. 100">
+                    </div>
+                    <div class="flex-1">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider" id="lbl-unit">Unit / Place</label>
+                        <input type="text" id="propertyUnit"
+                            oninput="calcPropertyTotal()"
+                            class="w-full mt-1 p-4 bg-slate-50 rounded-2xl border-2 border-transparent focus:border-teal-500 outline-none font-bold text-lg"
+                            placeholder="e.g. cent, acre">
+                    </div>
+                </div>
+
+                <!-- Row 2: Rate per unit -->
+                <div>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider" id="lbl-ratePerUnit">Rate per Unit (₹)</label>
+                    <div class="flex gap-3 mt-1 items-center">
+                        <div class="flex-1">
+                            <input type="number" id="ratePerUnit" min="0" step="any"
+                                oninput="calcPropertyTotal()"
+                                class="w-full p-4 bg-slate-50 rounded-2xl border-2 border-transparent focus:border-teal-500 outline-none font-bold text-lg"
+                                placeholder="e.g. 100000">
+                        </div>
+                        <div class="text-slate-400 text-xs font-bold" id="lbl-perUnit">per unit</div>
+                    </div>
+                </div>
+
+                <!-- Auto-calculated total property value in ₹ -->
+                <div id="propTotalBox" class="hidden calc-display">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-[10px] font-bold text-teal-700 uppercase tracking-widest" id="lbl-propTotalTitle">🧮 Total Property Value</p>
+                            <p class="text-[10px] text-teal-600 mt-0.5" id="propTotalFormula"></p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-teal-800 font-black text-xl" id="propTotalRupees"></p>
+                            <p class="text-[9px] text-teal-600 font-bold uppercase tracking-widest" id="lbl-autoCalc">Auto Calculated</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Heirs -->
+    <div class="bg-white p-6 rounded-3xl shadow-md border border-slate-100" id="heirSection">
+        <h2 class="text-sm font-bold text-emerald-800 mb-1 uppercase tracking-widest" id="lbl-heirs">Select Heirs</h2>
+        <p class="text-[10px] text-slate-400 mb-3 font-bold uppercase tracking-wide" id="lbl-heirHint">Each person can receive Money, Property, or Both</p>
+        <div class="flex gap-2 mb-4 flex-wrap">
+            <span class="text-[9px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-1 rounded-full" id="leg-money">● ₹ Money</span>
+            <span class="text-[9px] font-bold uppercase tracking-wider text-teal-700 bg-teal-50 px-2 py-1 rounded-full" id="leg-prop">● 🏠 Property</span>
+            <span class="text-[9px] font-bold uppercase tracking-wider text-violet-700 bg-violet-50 px-2 py-1 rounded-full" id="leg-both">● Both</span>
+        </div>
+        <div id="heirGrid" class="space-y-3"></div>
+        <div class="mt-8">
+            <button onclick="calculate()"
+                class="w-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-black py-4 rounded-2xl shadow-lg transition-all active:scale-95 uppercase text-sm tracking-widest" id="lbl-calcBtn">
+                Calculate Now
+            </button>
+        </div>
+    </div>
+
+    <!-- Results -->
+    <div id="resultsView" class="hidden space-y-4 pb-12">
+
+        <div class="print-header text-center mb-4">
+            <h1 class="text-2xl font-black text-emerald-900">Al-Qismah — Islamic Inheritance</h1>
+            <p class="text-xs text-slate-500 mt-1">Generated on <span id="printDate"></span></p>
+        </div>
+
+        <!-- Share bar -->
+        <div class="share-bar flex gap-3">
+            <button onclick="printResult()"
+                class="flex-1 flex items-center justify-center gap-2 bg-white border-2 border-slate-200 hover:border-emerald-500 text-slate-700 hover:text-emerald-700 font-bold py-3 rounded-2xl text-xs uppercase tracking-widest transition-all active:scale-95">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                </svg>
+                <span id="lbl-print">Print</span>
+            </button>
+            <button onclick="shareResult()"
+                class="flex-1 flex items-center justify-center gap-2 bg-white border-2 border-slate-200 hover:border-teal-500 text-slate-700 hover:text-teal-700 font-bold py-3 rounded-2xl text-xs uppercase tracking-widest transition-all active:scale-95">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+                </svg>
+                <span id="lbl-share">Share</span>
+            </button>
+            <button onclick="copyResult()"
+                class="flex-1 flex items-center justify-center gap-2 bg-white border-2 border-slate-200 hover:border-violet-500 text-slate-700 hover:text-violet-700 font-bold py-3 rounded-2xl text-xs uppercase tracking-widest transition-all active:scale-95">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                </svg>
+                <span id="lbl-copy">Copy</span>
+            </button>
+        </div>
+
+        <!-- Money result -->
+        <div id="moneyResultBlock" class="hidden">
+            <div class="bg-emerald-700 text-white p-6 rounded-3xl shadow-lg">
+                <p class="text-[10px] uppercase font-bold opacity-70" id="lbl-moneyDist">💰 Money Distribution</p>
+                <h3 id="netDisplay" class="text-2xl font-black mt-1"></h3>
+            </div>
+            <div class="bg-white rounded-3xl shadow-md overflow-hidden border border-slate-100 mt-2">
+                <div id="resultCards" class="divide-y divide-slate-100"></div>
+            </div>
+        </div>
+
+        <!-- Property result -->
+        <div id="propertyResultBlock" class="hidden">
+            <div class="bg-teal-700 text-white p-6 rounded-3xl shadow-lg mt-2">
+                <p class="text-[10px] uppercase font-bold opacity-70" id="lbl-propDist">🏠 Property Distribution</p>
+                <h3 id="propNetDisplay" class="text-2xl font-black mt-1"></h3>
+                <!-- show rupee equivalent in result header too -->
+                <p id="propNetRupees" class="text-sm opacity-80 mt-1 font-bold hidden"></p>
+            </div>
+            <div class="bg-white rounded-3xl shadow-md overflow-hidden border border-slate-100 mt-2">
+                <div id="propResultCards" class="divide-y divide-slate-100"></div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<footer class="mt-20">
+    <div class="max-w-7xl mx-auto text-center">
+        <p class="text-xs uppercase tracking-widest font-medium">&copy; 2026 Al-Qismah Islamic Portal. All Rights Reserved.</p>
+        <p class="mt-4 text-xs tracking-widest font-medium">Developed By Irshad Kolathur</p>
+    </div>
+</footer>
+
+<script>
+/* ══════════════ TRANSLATIONS ══════════════ */
+const T = {
+    en:{
+        hdrSub:'Islamic Inheritance Portal', langBtn:'മലയാളം',
+        estateTitle:'Estate Details', deceasedIs:'The Deceased is:',
+        male:'Male', female:'Female',
+        moneyEstate:'💰 Total Money Estate (₹)',
+        propDivider:'Property / Land',
+        propertyTitle:'🏠 Property / Land / Asset',
+        propHint:'Enter quantity, unit and rate — total value auto-calculates',
+        qty:'Quantity', unit:'Unit / Place',
+        ratePerUnit:'Rate per Unit (₹)',
+        perUnit:'per unit',
+        propTotalTitle:'🧮 Total Property Value',
+        autoCalc:'Auto Calculated',
+        heirs:'Select Heirs',
+        heirHint:'Each person can receive Money, Property, or Both',
+        legMoney:'● ₹ Money', legProp:'● 🏠 Property', legBoth:'● Both',
+        calcBtn:'Calculate Now', fabLabel:'Calculate',
+        moneyDist:'💰 Money Distribution', propDist:'🏠 Property Distribution',
+        moneyShare:'Money Share', propShare:'Property Share',
+        remainder:'Remainder', each:'each',
+        print:'Print', share:'Share', copy:'Copy', copied:'Copied!',
+        noEstate:'Please enter estate amount and/or property value.',
+        noHeir:'Please select at least one heir.',
+        wives:'Wives', husband:'Husband',
+        wifeSing:'Wife', husbandSing:'Husband',
+        treasury:'Bayt al-Mal (Treasury)',
+        singulars:{
+            spouses:'Wife', sons:'Son', daughters:'Daughter',
+            grandsons:'Grandson', granddaughters:'Granddaughter',
+            father:'Father', mother:'Mother',
+            grandfather:'Paternal Grandfather', paternalGrandmother:'Paternal Grandmother',
+            maternalGrandmother:'Maternal Grandmother',
+            fullBrothers:'Full Brother', fullSisters:'Full Sister',
+            paternalBrothers:'Paternal Brother', paternalSisters:'Paternal Sister',
+            maternalBrothers:'Maternal Brother', maternalSisters:'Maternal Sister',
+            fullNephews:"Brother's Son", fullUncles:'Paternal Uncle'
+        },
+        togMoney:'₹ Money', togProp:'🏠 Prop', togBoth:'Both',
+        receives:'Receives →',
+        rupeeEquiv:'≈ ₹',
+    },
+    ml:{
+        hdrSub:'ഇസ്‌ലാമിക അനന്തരാവകാശ പോർട്ടൽ', langBtn:'English',
+        estateTitle:'സ്വത്ത് വിവരങ്ങൾ', deceasedIs:'മരണപ്പെട്ടത്:',
+        male:'പുരുഷൻ', female:'സ്ത്രീ',
+        moneyEstate:'💰 മൊത്തം പണ സ്വത്ത് (₹)',
+        propDivider:'സ്വത്ത് / ഭൂമി',
+        propertyTitle:'🏠 സ്വത്ത് / ഭൂമി / ആസ്തി',
+        propHint:'അളവ്, യൂണിറ്റ്, നിരക്ക് നൽകുക — ആകെ മൂല്യം സ്വയം കണക്കാക്കും',
+        qty:'അളവ്', unit:'യൂണിറ്റ് / സ്ഥലം',
+        ratePerUnit:'ഒരു യൂണിറ്റിന്റെ നിരക്ക് (₹)',
+        perUnit:'ഒരു യൂണിറ്റിന്',
+        propTotalTitle:'🧮 ആകെ സ്വത്ത് മൂല്യം',
+        autoCalc:'സ്വയം കണക്കാക്കിയത്',
+        heirs:'അനന്തരാവകാശികളെ തിരഞ്ഞെടുക്കുക',
+        heirHint:'ഓരോ വ്യക്തിക്കും പണം, സ്വത്ത് അല്ലെങ്കിൽ രണ്ടും ലഭിക്കാം',
+        legMoney:'● ₹ പണം', legProp:'● 🏠 സ്വത്ത്', legBoth:'● രണ്ടും',
+        calcBtn:'കണക്കുകൂട്ടൽ', fabLabel:'കണക്ക്',
+        moneyDist:'💰 പണ വിതരണം', propDist:'🏠 സ്വത്ത് വിതരണം',
+        moneyShare:'പണ വിഹിതം', propShare:'സ്വത്ത് വിഹിതം',
+        remainder:'ശേഷിക്കുന്നത്', each:'വീതം',
+        print:'പ്രിന്റ്', share:'ഷെയർ', copy:'കോപ്പി', copied:'പകർത്തി!',
+        noEstate:'ദയവായി തുക അല്ലെങ്കിൽ സ്വത്ത് മൂല്യം നൽകുക.',
+        noHeir:'ദയവായി ഒരു അനന്തരാവകാശിയെ തിരഞ്ഞെടുക്കുക.',
+        wives:'ഭാര്യമാർ', husband:'ഭർത്താവ്',
+        wifeSing:'ഭാര്യ', husbandSing:'ജീവിച്ചിരിക്കുന്ന ഭർത്താവ്',
+        treasury:'ബൈത്തുൽ മാൽ (ഖജനാവ്)',
+        singulars:{
+            spouses:'ഭാര്യ', sons:'മകൻ', daughters:'മകൾ',
+            grandsons:'പേരക്കുട്ടി (ആൺ)', granddaughters:'പേരക്കുട്ടി (പെൺ)',
+            father:'പിതാവ്', mother:'മാതാവ്',
+            grandfather:'മുത്തശ്ശൻ (പൈതൃക)', paternalGrandmother:'മുത്തശ്ശി (പൈതൃക)',
+            maternalGrandmother:'മുത്തശ്ശി (മാതൃ)',
+            fullBrothers:'സഹോദരൻ', fullSisters:'സഹോദരി',
+            paternalBrothers:'സഹോദരൻ (പൈതൃക)', paternalSisters:'സഹോദരി (പൈതൃക)',
+            maternalBrothers:'സഹോദരൻ (മാതൃ)', maternalSisters:'സഹോദരി (മാതൃ)',
+            fullNephews:'സഹോദരൻറെ മകൻ', fullUncles:'അമ്മാവൻ (പൈതൃക)'
+        },
+        togMoney:'₹ പണം', togProp:'🏠 സ്വത്ത്', togBoth:'രണ്ടും',
+        receives:'ലഭിക്കുന്നത് →',
+        rupeeEquiv:'≈ ₹',
+    }
+};
+
+const heirCategories = [
+    { id:"spouses",             sub:{en:"Must be legally married",  ml:"നിയമപരമായി വിവാഹിതരാകണം"}, type:"number" },
+    { id:"sons",                sub:{en:"Biological only",           ml:"സ്വന്തം മക്കൾ മാത്രം"},        type:"number" },
+    { id:"daughters",           sub:{en:"Biological only",           ml:"സ്വന്തം മക്കൾ മാത്രം"},        type:"number" },
+    { id:"grandsons",           sub:{en:"From son's side",           ml:"മകൻറെ ഭാഗത്ത് നിന്ന്"},       type:"number" },
+    { id:"granddaughters",      sub:{en:"From son's side",           ml:"മകൻറെ ഭാഗത്ത് നിന്ന്"},       type:"number" },
+    { id:"father",              sub:{en:"Direct biological",         ml:"നേരിട്ടുള്ള പിതാവ്"},          type:"checkbox" },
+    { id:"mother",              sub:{en:"Direct biological",         ml:"നേരിട്ടുള്ള മാതാവ്"},          type:"checkbox" },
+    { id:"grandfather",         sub:{en:"Father's father",           ml:"പിതാവിൻറെ പിതാവ്"},           type:"checkbox" },
+    { id:"paternalGrandmother", sub:{en:"Father's mother",           ml:"പിതാവിൻറെ മാതാവ്"},           type:"checkbox" },
+    { id:"maternalGrandmother", sub:{en:"Mother's mother",           ml:"മാതാവിൻറെ മാതാവ്"},           type:"checkbox" },
+    { id:"fullBrothers",        sub:{en:"Same father & mother",      ml:"ഒരേ പിതാവും മാതാവും"},        type:"number" },
+    { id:"fullSisters",         sub:{en:"Same father & mother",      ml:"ഒരേ പിതാവും മാതാവും"},        type:"number" },
+    { id:"paternalBrothers",    sub:{en:"Same father",               ml:"ഒരേ പിതാവ്"},                  type:"number" },
+    { id:"paternalSisters",     sub:{en:"Same father",               ml:"ഒരേ പിതാവ്"},                  type:"number" },
+    { id:"maternalBrothers",    sub:{en:"Same mother",               ml:"ഒരേ മാതാവ്"},                  type:"number" },
+    { id:"maternalSisters",     sub:{en:"Same mother",               ml:"ഒരേ മാതാവ്"},                  type:"number" },
+    { id:"fullNephews",         sub:{en:"Full brother's son",        ml:"സഹോദരൻറെ മകൻ"},               type:"number" },
+    { id:"fullUncles",          sub:{en:"Father's full brother",     ml:"പിതാവിൻറെ സഹോദരൻ"},          type:"number" }
+];
+
+let selectedGender = 'male';
+let lang = 'en';
+const personDist = {};
+heirCategories.forEach(h => personDist[h.id] = []);
+
+function t(key) { return T[lang][key] ?? T.en[key] ?? key; }
+function ts(catId) { return T[lang].singulars[catId] ?? T.en.singulars[catId] ?? catId; }
+
+/* ── Language ── */
+function toggleLang() {
+    lang = lang === 'en' ? 'ml' : 'en';
+    document.body.classList.toggle('ml', lang === 'ml');
+    applyTranslations();
+    renderHeirs();
+    calcPropertyTotal();
+}
+
+function applyTranslations() {
+    const map = [
+        ['hdr-sub','hdrSub'],['langBtnLabel','langBtn'],
+        ['lbl-estateTitle','estateTitle'],['lbl-deceasedIs','deceasedIs'],
+        ['lbl-moneyEstate','moneyEstate'],['lbl-propDivider','propDivider'],
+        ['lbl-propertyTitle','propertyTitle'],['lbl-propHint','propHint'],
+        ['lbl-qty','qty'],['lbl-unit','unit'],
+        ['lbl-ratePerUnit','ratePerUnit'],['lbl-perUnit','perUnit'],
+        ['lbl-propTotalTitle','propTotalTitle'],['lbl-autoCalc','autoCalc'],
+        ['lbl-heirs','heirs'],['lbl-heirHint','heirHint'],
+        ['leg-money','legMoney'],['leg-prop','legProp'],['leg-both','legBoth'],
+        ['lbl-calcBtn','calcBtn'],['fabLabel','fabLabel'],
+        ['lbl-moneyDist','moneyDist'],['lbl-propDist','propDist'],
+        ['lbl-print','print'],['lbl-share','share'],['lbl-copy','copy']
+    ];
+    map.forEach(([id,key]) => { const el=document.getElementById(id); if(el) el.textContent=t(key); });
+    document.getElementById('btnMale').textContent   = t('male');
+    document.getElementById('btnFemale').textContent = t('female');
+}
+
+/* ── Property auto-calc ── */
+function calcPropertyTotal() {
+    const qty  = parseFloat(document.getElementById('propertyValue').value) || 0;
+    const rate = parseFloat(document.getElementById('ratePerUnit').value)   || 0;
+    const unit = (document.getElementById('propertyUnit').value || '').trim() || 'unit';
+    const box  = document.getElementById('propTotalBox');
+
+    if (qty > 0 && rate > 0) {
+        const total = qty * rate;
+        document.getElementById('propTotalFormula').textContent =
+            `${qty.toLocaleString('en-IN')} ${unit} × ₹${rate.toLocaleString('en-IN')} = `;
+        document.getElementById('propTotalRupees').textContent =
+            '₹' + total.toLocaleString('en-IN', { maximumFractionDigits: 0 });
+        box.classList.remove('hidden');
+    } else {
+        box.classList.add('hidden');
+    }
+}
+
+/* ── Gender ── */
+function setGender(gender) {
+    selectedGender = gender;
+    const isMale = gender === 'male';
+    document.getElementById('btnMale').className   = isMale
+        ? "flex-1 p-3 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-700 text-sm font-bold"
+        : "flex-1 p-3 rounded-xl border-2 border-slate-200 bg-slate-50 text-slate-400 text-sm font-bold";
+    document.getElementById('btnFemale').className = !isMale
+        ? "flex-1 p-3 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-700 text-sm font-bold"
+        : "flex-1 p-3 rounded-xl border-2 border-slate-200 bg-slate-50 text-slate-400 text-sm font-bold";
+    renderHeirs();
+}
+
+/* ── Per-person dist ── */
+function setPersonDist(catId, idx, val) {
+    personDist[catId][idx] = val;
+    const tog = document.getElementById(`tog_${catId}_${idx}`);
+    if (!tog) return;
+    tog.querySelectorAll('button').forEach(b => b.classList.remove('am','ap','ab'));
+    const btn = tog.querySelector(`[data-v="${val}"]`);
+    if (btn) btn.classList.add(val==='money'?'am':val==='property'?'ap':'ab');
+}
+
+function buildPersonRows(catId, count) {
+    while (personDist[catId].length < count) personDist[catId].push('both');
+    personDist[catId].length = count;
+    let html = '';
+    const sing = catId === 'spouses'
+        ? (selectedGender === 'male' ? t('wifeSing') : t('husbandSing'))
+        : ts(catId);
+    for (let i = 0; i < count; i++) {
+        const d = personDist[catId][i] || 'both';
+        const lbl = count > 1 ? `${sing} ${i+1}` : sing;
+        html += `
+        <div class="person-row">
+            <div class="person-num">${i+1}</div>
+            <div class="flex-1 min-w-0">
+                <p class="text-[10px] font-bold text-slate-600 truncate">${lbl}</p>
+                <p class="text-[9px] text-slate-400">${t('receives')}</p>
+            </div>
+            <div class="tog w-40 flex-shrink-0" id="tog_${catId}_${i}">
+                <button data-v="money"    onclick="setPersonDist('${catId}',${i},'money')"    class="${d==='money'?'am':''}">${t('togMoney')}</button>
+                <button data-v="property" onclick="setPersonDist('${catId}',${i},'property')" class="${d==='property'?'ap':''}">${t('togProp')}</button>
+                <button data-v="both"     onclick="setPersonDist('${catId}',${i},'both')"     class="${d==='both'?'ab':''}">${t('togBoth')}</button>
+            </div>
+        </div>`;
+    }
+    return html;
+}
+
+function onCountChange(catId) {
+    const count = parseInt(document.getElementById('inp_'+catId).value || 0);
+    const area  = document.getElementById('persons_'+catId);
+    if (count > 0) {
+        area.innerHTML = buildPersonRows(catId, count);
+        area.classList.remove('hidden');
+    } else {
+        area.classList.add('hidden');
+        area.innerHTML = '';
+        personDist[catId] = [];
+    }
+}
+
+function onCheckChange(catId) {
+    const checked = document.getElementById('inp_'+catId).checked;
+    const area    = document.getElementById('persons_'+catId);
+    if (checked) {
+        personDist[catId] = [personDist[catId][0] || 'both'];
+        area.innerHTML = buildPersonRows(catId, 1);
+        area.classList.remove('hidden');
+    } else {
+        area.classList.add('hidden');
+        area.innerHTML = '';
+        personDist[catId] = [];
+    }
+}
+
+function renderHeirs() {
+    const grid = document.getElementById('heirGrid');
+    grid.innerHTML = '';
+    heirCategories.forEach(h => {
+        const label = h.id === 'spouses'
+            ? (selectedGender === 'male' ? t('wives') : t('husband'))
+            : ts(h.id);
+        const sub = h.sub[lang] || h.sub.en;
+        const wrapper = document.createElement('div');
+        wrapper.className = 'bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden';
+        const inputHtml = h.type === 'number'
+            ? `<input type="number" id="inp_${h.id}" value="0" min="0" max="20"
+                oninput="onCountChange('${h.id}')"
+                class="w-14 h-10 text-center bg-white border border-slate-200 rounded-xl font-bold text-sm focus:border-emerald-500 outline-none ml-2">`
+            : `<input type="checkbox" id="inp_${h.id}"
+                onchange="onCheckChange('${h.id}')"
+                class="w-5 h-5 accent-emerald-600 ml-2">`;
+        wrapper.innerHTML = `
+            <div class="flex items-center justify-between p-4">
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs font-bold text-slate-700">${label}</p>
+                    <p class="text-[9px] text-slate-400 uppercase tracking-tighter">${sub}</p>
+                </div>
+                ${inputHtml}
+            </div>
+            <div id="persons_${h.id}" class="hidden px-3 pb-3"></div>
+        `;
+        grid.appendChild(wrapper);
+    });
+}
+
+/* ── Calculation core ── */
+function getFractionLabel(f, name) {
+    if (name.includes('Bayt') || name.includes('ബൈത്ത്')) return t('remainder');
+    const tol = 0.001;
+    if (Math.abs(f-1/2)<tol) return '1/2';
+    if (Math.abs(f-1/3)<tol) return '1/3';
+    if (Math.abs(f-1/4)<tol) return '1/4';
+    if (Math.abs(f-1/6)<tol) return '1/6';
+    if (Math.abs(f-1/8)<tol) return '1/8';
+    if (Math.abs(f-2/3)<tol) return '2/3';
+    return lang === 'ml' ? 'ശേഷം' : 'Residue';
+}
+
+function buildPoolCounts(pool) {
+    const counts = {};
+    heirCategories.forEach(cat => {
+        const d = personDist[cat.id];
+        counts[cat.id] = (!d||d.length===0) ? 0 : d.filter(x => x===pool||x==='both').length;
+    });
+    return counts;
+}
+
+function computeShares(vals) {
+    let results = [], remaining = 1.0;
+    const hasDesc = (vals.sons+vals.daughters+(vals.grandsons||0)+(vals.granddaughters||0)) > 0;
+
+    if (vals.spouses > 0) {
+        let f = selectedGender==='male' ? (hasDesc?1/8:1/4) : (hasDesc?1/4:1/2);
+        results.push({name:selectedGender==='male'?t('wives'):t('husband'), count:vals.spouses, f, perPerson:f/vals.spouses});
+        remaining -= f;
+    }
+    if (vals.father > 0)  { results.push({name:ts('father'),   count:1, f:1/6,              perPerson:1/6}); remaining-=1/6; }
+    if (vals.mother > 0)  { let ms=hasDesc?1/6:1/3; results.push({name:ts('mother'),  count:1, f:ms,  perPerson:ms}); remaining-=ms; }
+    if (remaining>0.001 && (vals.sons>0||vals.daughters>0)) {
+        let parts = (vals.sons*2)+vals.daughters;
+        if (vals.sons>0) {
+            let f=(remaining/parts)*2*vals.sons;
+            results.push({name:ts('sons'), count:vals.sons, f, perPerson:f/vals.sons});
+        }
+        if (vals.daughters>0) {
+            let f=(remaining/parts)*vals.daughters;
+            results.push({name:ts('daughters'), count:vals.daughters, f, perPerson:f/vals.daughters});
+        }
+        remaining=0;
+    }
+    if (remaining>0.001) results.push({name:t('treasury'), count:1, f:remaining, perPerson:remaining, isTreasury:true});
+    return results;
+}
+
+/* ── Render cards ── */
+function makeCard(r, mainAmt, eachAmt, colorCls, badgeCls, subLine) {
+    return `
+    <div class="p-5 ${r.isTreasury?'bg-slate-50':'bg-white'}">
+        <div class="flex justify-between items-start">
+            <div class="flex-1 pr-3">
+                <p class="font-bold text-slate-700 text-sm">${r.name}${r.count>1?` <span class="text-slate-400 font-normal text-xs">×${r.count}</span>`:''}</p>
+                <p class="text-[10px] font-bold ${badgeCls} px-2 py-0.5 rounded-full w-fit mt-1">
+                    ${getFractionLabel(r.f,r.name)} &bull; ${(r.f*100).toFixed(2)}%
+                </p>
+                ${r.count>1?`<p class="text-[9px] text-slate-400 font-bold mt-0.5">${eachAmt} ${t('each')}</p>`:''}
+                ${subLine?`<p class="text-[9px] text-slate-500 font-bold mt-1">${subLine}</p>`:''}
+            </div>
+            <div class="text-right flex-shrink-0">
+                <p class="${colorCls} font-black text-lg leading-tight">${mainAmt}</p>
+            </div>
+        </div>
+    </div>`;
+}
+
+function renderMoneyCards(results, net) {
+    document.getElementById('resultCards').innerHTML = results.map(r => {
+        const tot  = '₹'+(r.f*net).toLocaleString('en-IN',{maximumFractionDigits:0});
+        const each = '₹'+(r.perPerson*net).toLocaleString('en-IN',{maximumFractionDigits:0});
+        return makeCard(r, tot, each, 'text-emerald-700', 'text-emerald-600 bg-emerald-50', '');
+    }).join('');
+}
+
+function renderPropertyCards(results, pv, unit, rate) {
+    document.getElementById('propResultCards').innerHTML = results.map(r => {
+        const qty  = r.f * pv;
+        const qtyE = r.perPerson * pv;
+        const qtyFmt  = parseFloat(qty.toFixed(4)).toLocaleString('en-IN',{maximumFractionDigits:4});
+        const qtyEFmt = parseFloat(qtyE.toFixed(4)).toLocaleString('en-IN',{maximumFractionDigits:4});
+        const mainAmt = `${qtyFmt} ${unit}`;
+        const eachAmt = `${qtyEFmt} ${unit}`;
+        // If rate given, show rupee equivalent below
+        let subLine = '';
+        if (rate > 0) {
+            const rupeeTot  = '₹'+(qty*rate).toLocaleString('en-IN',{maximumFractionDigits:0});
+            const rupeeEach = rate > 0 && r.count > 1
+                ? ' (₹'+(qtyE*rate).toLocaleString('en-IN',{maximumFractionDigits:0})+' '+t('each')+')'
+                : '';
+            subLine = `${t('rupeeEquiv')} ${rupeeTot}${rupeeEach}`;
+        }
+        return makeCard(r, mainAmt, eachAmt, 'text-teal-700', 'text-teal-600 bg-teal-50', subLine);
+    }).join('');
+}
+
+/* ── Summary for copy/share ── */
+function buildSummaryText() {
+    const net  = parseFloat(document.getElementById('totalEstate').value) || 0;
+    const pv   = parseFloat(document.getElementById('propertyValue').value) || 0;
+    const pu   = (document.getElementById('propertyUnit').value||'').trim()||'units';
+    const rate = parseFloat(document.getElementById('ratePerUnit').value) || 0;
+    let txt = 'Al-Qismah — Islamic Inheritance Result\n━━━━━━━━━━━━━━━━━━━━━━━\n';
+    const getMB = document.getElementById('moneyResultBlock');
+    const getPB = document.getElementById('propertyResultBlock');
+    if (net>0 && !getMB.classList.contains('hidden')) {
+        txt += `\n💰 Money: ₹${net.toLocaleString('en-IN')}\n`;
+        getMB.querySelectorAll('.p-5').forEach(el => {
+            const name = el.querySelector('p.font-bold')?.innerText?.trim();
+            const amt  = el.querySelector('p.font-black')?.innerText?.trim();
+            if(name && amt) txt += `  ${name}: ${amt}\n`;
+        });
+    }
+    if (pv>0 && !getPB.classList.contains('hidden')) {
+        txt += `\n🏠 Property: ${pv} ${pu}`;
+        if (rate > 0) txt += ` (₹${(pv*rate).toLocaleString('en-IN')} total)`;
+        txt += '\n';
+        getPB.querySelectorAll('.p-5').forEach(el => {
+            const name = el.querySelector('p.font-bold')?.innerText?.trim();
+            const amt  = el.querySelector('p.font-black')?.innerText?.trim();
+            if(name && amt) txt += `  ${name}: ${amt}\n`;
+        });
+    }
+    txt += '\n— Generated by Al-Qismah';
+    return txt;
+}
+
+function calculate() {
+    const net  = parseFloat(document.getElementById('totalEstate').value)  || 0;
+    const pv   = parseFloat(document.getElementById('propertyValue').value) || 0;
+    const pu   = (document.getElementById('propertyUnit').value||'').trim() || 'units';
+    const rate = parseFloat(document.getElementById('ratePerUnit').value)   || 0;
+
+    if (net<=0 && pv<=0) return alert(t('noEstate'));
+    const anyHeir = heirCategories.some(c => (personDist[c.id]||[]).length > 0);
+    if (!anyHeir) return alert(t('noHeir'));
+
+    const mC = buildPoolCounts('money');
+    const pC = buildPoolCounts('property');
+    const hasMH = Object.values(mC).some(v=>v>0);
+    const hasPH = Object.values(pC).some(v=>v>0);
+
+    document.getElementById('resultsView').classList.remove('hidden');
+    document.getElementById('printDate').textContent =
+        new Date().toLocaleDateString(lang==='ml'?'ml-IN':'en-IN',{year:'numeric',month:'long',day:'numeric'});
+
+    // Money block
+    const mb = document.getElementById('moneyResultBlock');
+    if (net>0 && hasMH) {
+        mb.classList.remove('hidden');
+        document.getElementById('netDisplay').textContent = '₹'+net.toLocaleString('en-IN');
+        renderMoneyCards(computeShares(mC), net);
+    } else { mb.classList.add('hidden'); }
+
+    // Property block
+    const pb = document.getElementById('propertyResultBlock');
+    if (pv>0 && hasPH) {
+        pb.classList.remove('hidden');
+        document.getElementById('propNetDisplay').textContent =
+            pv.toLocaleString('en-IN',{maximumFractionDigits:4})+' '+pu;
+        // Show rupee total in header if rate given
+        const rnEl = document.getElementById('propNetRupees');
+        if (rate > 0) {
+            rnEl.textContent = '≈ ₹'+(pv*rate).toLocaleString('en-IN',{maximumFractionDigits:0});
+            rnEl.classList.remove('hidden');
+        } else { rnEl.classList.add('hidden'); }
+        renderPropertyCards(computeShares(pC), pv, pu, rate);
+    } else { pb.classList.add('hidden'); }
+
+    window.scrollTo({top:document.getElementById('resultsView').offsetTop-100, behavior:'smooth'});
+}
+
+function printResult() { window.print(); }
+
+function shareResult() {
+    const txt = buildSummaryText();
+    if (navigator.share) {
+        navigator.share({title:'Al-Qismah Result', text:txt}).catch(()=>{});
+    } else {
+        window.open('https://api.whatsapp.com/send?text='+encodeURIComponent(txt),'_blank');
+    }
+}
+
+function copyResult() {
+    const txt = buildSummaryText();
+    const btn = document.getElementById('lbl-copy');
+    const orig = btn.textContent;
+    navigator.clipboard.writeText(txt).then(()=>{
+        btn.textContent = t('copied');
+        setTimeout(()=>btn.textContent=orig, 2000);
+    }).catch(()=>{
+        const ta=document.createElement('textarea');
+        ta.value=txt; document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); document.body.removeChild(ta);
+        btn.textContent = t('copied');
+        setTimeout(()=>btn.textContent=orig, 2000);
+    });
+}
+
+renderHeirs();
+</script>
+</body>
+</html>
